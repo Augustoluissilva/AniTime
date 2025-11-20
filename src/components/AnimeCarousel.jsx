@@ -3,9 +3,11 @@ import React, { useState, useRef, useEffect } from 'react'
 // Importando as imagens
 import spyFamily from '../assets/SPY_FAMILY.png'
 import freeren from '../assets/FREEREN.png'
-import naruto from '../assets/naruto.png'
-import onePiece from '../assets/one_piece.png'
+import Mashle from '../assets/Mashle.jpg'
+import Bocchi_the_Rock from '../assets/Bocchi_the_Rock.webp'
 import myHero from '../assets/My_Hero.png'
+import Demon_Slayer from '../assets/Demon_Slayer.webp'
+import Maid_Dragon from '../assets/Maid_Dragon.jpg'
 
 const AnimeCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -15,11 +17,11 @@ const AnimeCarousel = () => {
   const animes = [
     { id: 1, title: 'SPY FAMILY', image: spyFamily, featured: false },
     { id: 2, title: 'FRIEREN', image: freeren, featured: true },
-    { id: 3, title: 'NARUTO', image: naruto, featured: false },
-    { id: 4, title: 'ONE PIECE', image: onePiece, featured: false },
+    { id: 3, title: 'Mashle', image: Mashle, featured: false },
+    { id: 4, title: 'ONE PIECE', image: Bocchi_the_Rock, featured: false },
     { id: 5, title: 'MY HERO ACADEMIA', image: myHero, featured: false },
-    { id: 6, title: 'DEMON SLAYER', image: '/api/placeholder/300/400', featured: false },
-    { id: 7, title: 'ATTACK ON TITAN', image: '/api/placeholder/300/400', featured: false },
+    { id: 6, title: 'DEMON SLAYER', image: Demon_Slayer, featured: false },
+    { id: 7, title: 'ATTACK ON TITAN', image: Maid_Dragon, featured: false },
   ]
 
   const scrollToIndex = (index) => {

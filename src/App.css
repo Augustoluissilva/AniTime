@@ -31,6 +31,13 @@ body {
   top: 0;
   z-index: 1000;
   border-bottom: 1px solid rgba(160, 102, 255, 0.2);
+  transition: transform .35s ease, opacity .35s ease;
+}
+
+.header--hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .header-container {
