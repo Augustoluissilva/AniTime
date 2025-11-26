@@ -23,7 +23,559 @@ body {
   overflow-x: hidden;
 }
 
+<<<<<<< HEAD
 /* Animações Globais */
+=======
+/* Header Styles */
+.header {
+  background: var(--dark-purple);
+  padding: 1.5rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid rgba(160, 102, 255, 0.2);
+  transition: transform .35s ease, opacity .35s ease;
+}
+
+.header--hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+}
+
+.logo-text {
+  font-size: 2.5rem;
+  font-weight: 300;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 2px;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+}
+
+.nav-link {
+  color: var(--white);
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 400;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: var(--neon-purple);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--gradient);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-link:hover::after {
+  width: 80%;
+}
+
+.entrar-btn {
+  background: var(--neon-purple);
+  color: var(--white) !important;
+  padding: 0.7rem 2rem;
+  border-radius: 25px;
+  font-weight: 500;
+}
+
+.entrar-btn:hover {
+  background: var(--light-purple);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(160, 102, 255, 0.4);
+}
+
+.entrar-btn::after {
+  display: none;
+}
+
+/* Carousel Header e Controles */
+.carousel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 300;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 1px;
+}
+
+.carousel-controls {
+  display: flex;
+  gap: 1rem;
+}
+
+.carousel-btn {
+  background: rgba(160, 102, 255, 0.1);
+  border: 2px solid var(--neon-purple);
+  color: var(--neon-purple);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.carousel-btn:hover {
+  background: var(--neon-purple);
+  color: var(--white);
+  transform: scale(1.1);
+  box-shadow: 0 0 20px var(--neon-purple);
+}
+
+.carousel-btn:active {
+  transform: scale(0.95);
+}
+
+/* Indicadores do Carousel */
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 2rem;
+  padding: 0 1rem;
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--neon-purple);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator.active {
+  background: var(--neon-purple);
+  transform: scale(1.2);
+  box-shadow: 0 0 10px var(--neon-purple);
+}
+
+.indicator:hover {
+  background: var(--neon-purple);
+  transform: scale(1.1);
+}
+
+/* Carousel Styles */
+.carousel-section {
+  padding: 3rem 0;
+  background: var(--purple-bg);
+}
+
+.carousel-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.carousel {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding: 2rem 1rem;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+}
+
+.carousel:active {
+  cursor: grabbing;
+}
+
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+
+/* CARDS DO CARROSSEL COM BORDAS ROXAS - ESTILO DO LAYOUT */
+.anime-card {
+  min-width: 280px;
+  height: 380px;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: pointer;
+  flex-shrink: 0;
+  transform-origin: center center;
+  
+  /* BORDA ROXA SÓLIDA - ESTILO DO LAYOUT */
+  border: 3px solid var(--neon-purple);
+  background: linear-gradient(145deg, rgba(160, 102, 255, 0.1), rgba(178, 122, 255, 0.05));
+  box-shadow: 0 8px 32px rgba(160, 102, 255, 0.2);
+}
+
+.anime-card.featured {
+  min-width: 320px;
+  height: 420px;
+  transform: scale(1.05);
+  
+  /* BORDA DESTACADA PARA O CARD FEATURED */
+  border: 4px solid var(--neon-purple);
+  box-shadow: 0 12px 40px rgba(160, 102, 255, 0.4);
+  background: linear-gradient(145deg, rgba(160, 102, 255, 0.15), rgba(178, 122, 255, 0.1));
+}
+
+/* Efeito de brilho interno */
+.anime-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 9px; /* 12px - 3px da borda */
+  background: linear-gradient(135deg, 
+    rgba(160, 102, 255, 0.1) 0%, 
+    transparent 50%, 
+    rgba(178, 122, 255, 0.1) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Animação de hover mais suave e destacada */
+.anime-card:hover {
+  transform: scale(1.08) translateY(-15px);
+  z-index: 10;
+  border-color: var(--light-purple);
+  box-shadow: 0 15px 50px rgba(160, 102, 255, 0.5);
+}
+
+.anime-card.featured:hover {
+  transform: scale(1.1) translateY(-15px);
+  border-color: var(--light-purple);
+  box-shadow: 0 20px 60px rgba(160, 102, 255, 0.6);
+}
+
+/* Animação quando navega com as setas */
+.anime-card.active {
+  transform: scale(1.08);
+  z-index: 5;
+  animation: slideInScale 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-color: var(--light-purple);
+}
+
+.anime-card.featured.active {
+  transform: scale(1.12);
+  border-color: var(--light-purple);
+}
+
+.anime-card.nav-active {
+  transform: scale(1.06);
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-color: var(--light-purple);
+}
+
+.anime-card.featured.nav-active {
+  transform: scale(1.09);
+  border-color: var(--light-purple);
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 9px; /* Para ficar dentro da borda */
+}
+
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-radius: 9px;
+}
+
+.anime-card:hover .card-image img {
+  transform: scale(1.15);
+}
+
+.card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(10, 0, 20, 0.95));
+  padding: 2rem 1.5rem 1.5rem;
+  transition: all 0.4s ease;
+  z-index: 2;
+  border-radius: 0 0 9px 9px;
+}
+
+.anime-card:hover .card-overlay {
+  background: linear-gradient(transparent, rgba(160, 102, 255, 0.3), rgba(10, 0, 20, 0.95));
+  padding-bottom: 2rem;
+}
+
+.anime-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--white);
+  text-align: center;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  transform: translateY(10px);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.anime-card:hover .anime-title {
+  transform: translateY(0);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.anime-card.featured .anime-title {
+  font-size: 1.6rem;
+}
+
+/* Efeito de glow externo - removido para focar na borda sólida */
+.card-glow {
+  display: none; /* Removendo o glow para focar na borda sólida do layout */
+}
+
+/* Welcome Section */
+.welcome-section {
+  padding: 6rem 2rem;
+  background: var(--black-violet);
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.welcome-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+}
+
+.welcome-title {
+  font-size: 3.5rem;
+  font-weight: 300;
+  line-height: 1.2;
+  margin-bottom: 2rem;
+  color: var(--white);
+}
+
+.title-highlight {
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 400;
+  position: relative;
+}
+
+.title-highlight::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--gradient);
+}
+
+.welcome-text {
+  font-size: 1.3rem;
+  line-height: 1.8;
+  margin-bottom: 3rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.welcome-text p {
+  margin-bottom: 0.3rem;
+}
+
+.cta-button {
+  background: var(--white);
+  color: var(--dark-purple);
+  border: none;
+  padding: 1.2rem 3rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.cta-button:hover {
+  background: var(--neon-purple);
+  color: var(--white);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(160, 102, 255, 0.4);
+}
+
+.welcome-image {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.welcome-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.image-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px;
+  box-shadow: inset 0 0 50px rgba(160, 102, 255, 0.1);
+  pointer-events: none;
+}
+
+/* Benefits Section */
+.benefits-section {
+  padding: 6rem 2rem;
+  background: var(--purple-bg);
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.benefits-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+}
+
+.benefits-image {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.benefits-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.benefits-content {
+  padding: 2rem 0;
+}
+
+.benefits-title {
+  font-size: 2.2rem;
+  font-weight: 400;
+  margin-bottom: 3rem;
+  color: var(--white);
+  line-height: 1.4;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.benefit-card {
+  background: var(--white);
+  padding: 2rem 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(160, 102, 255, 0.2);
+}
+
+.benefit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(160, 102, 255, 0.2);
+}
+
+.benefit-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.benefit-text {
+  flex: 1;
+}
+
+.benefit-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--dark-purple);
+  margin-bottom: 0.5rem;
+}
+
+.benefit-description {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Footer */
+.footer {
+  background: var(--dark-purple);
+  padding: 2rem 0;
+  border-top: 1px solid rgba(160, 102, 255, 0.2);
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 0 2rem;
+}
+
+.footer p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+/* Animações */
+>>>>>>> e7c17d72f4b1041a79183fe06c6b66a2b4f681a1
 @keyframes fadeInUp {
   from {
     opacity: 0;

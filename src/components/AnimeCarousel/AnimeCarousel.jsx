@@ -1,12 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react'
 import './AnimeCarousel.css'
 
+<<<<<<< HEAD:src/components/AnimeCarousel/AnimeCarousel.jsx
 // Importando as imagens locais - caminho correto
 import spyFamily from '../../assets/SPY_FAMILY.png'
 import freeren from '../../assets/FREEREN.png'
 import naruto from '../../assets/naruto.png'
 import onePiece from '../../assets/one_piece.png'
 import myHero from '../../assets/My_Hero.png'
+=======
+// Importando as imagens
+import spyFamily from '../assets/SPY_FAMILY.png'
+import freeren from '../assets/FREEREN.png'
+import Mashle from '../assets/Mashle.jpg'
+import Bocchi_the_Rock from '../assets/Bocchi_the_Rock.webp'
+import myHero from '../assets/My_Hero.png'
+import Demon_Slayer from '../assets/Demon_Slayer.webp'
+import Maid_Dragon from '../assets/Maid_Dragon.jpg'
+>>>>>>> e7c17d72f4b1041a79183fe06c6b66a2b4f681a1:src/components/AnimeCarousel.jsx
 
 const AnimeCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -14,6 +25,7 @@ const AnimeCarousel = () => {
   const carouselRef = useRef(null)
 
   const animes = [
+<<<<<<< HEAD:src/components/AnimeCarousel/AnimeCarousel.jsx
     { 
       id: 1, 
       title: 'SPY FAMILY', 
@@ -44,6 +56,15 @@ const AnimeCarousel = () => {
       image: myHero, 
       featured: false 
     },
+=======
+    { id: 1, title: 'SPY FAMILY', image: spyFamily, featured: false },
+    { id: 2, title: 'FRIEREN', image: freeren, featured: true },
+    { id: 3, title: 'Mashle', image: Mashle, featured: false },
+    { id: 4, title: 'ONE PIECE', image: Bocchi_the_Rock, featured: false },
+    { id: 5, title: 'MY HERO ACADEMIA', image: myHero, featured: false },
+    { id: 6, title: 'DEMON SLAYER', image: Demon_Slayer, featured: false },
+    { id: 7, title: 'ATTACK ON TITAN', image: Maid_Dragon, featured: false },
+>>>>>>> e7c17d72f4b1041a79183fe06c6b66a2b4f681a1:src/components/AnimeCarousel.jsx
   ]
 
   // ... (resto do código permanece igual)
