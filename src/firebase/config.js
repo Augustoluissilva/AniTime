@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
+import { getStorage } from 'firebase/storage'
 
 // ATENÇÃO: COLOQUE SUAS CREDENCIAIS AQUI PARA USAR O FIRESTORE
 const firebaseConfig = {
@@ -18,3 +19,5 @@ const app = initializeApp(firebaseConfig)
 
 // Exporta o Firestore (Banco de Dados de Metadados)
 export const db = getFirestore(app)
+
+export const storage = getStorage(app)
