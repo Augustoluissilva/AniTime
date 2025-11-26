@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react'
+import './AnimeCarousel.css'
 
-// Importando as imagens
-import spyFamily from '../assets/SPY_FAMILY.png'
-import freeren from '../assets/FREEREN.png'
-import naruto from '../assets/naruto.png'
-import onePiece from '../assets/one_piece.png'
-import myHero from '../assets/My_Hero.png'
+// Importando as imagens locais - caminho correto
+import spyFamily from '../../assets/SPY_FAMILY.png'
+import freeren from '../../assets/FREEREN.png'
+import naruto from '../../assets/naruto.png'
+import onePiece from '../../assets/one_piece.png'
+import myHero from '../../assets/My_Hero.png'
 
 const AnimeCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -13,15 +14,39 @@ const AnimeCarousel = () => {
   const carouselRef = useRef(null)
 
   const animes = [
-    { id: 1, title: 'SPY FAMILY', image: spyFamily, featured: false },
-    { id: 2, title: 'FRIEREN', image: freeren, featured: true },
-    { id: 3, title: 'NARUTO', image: naruto, featured: false },
-    { id: 4, title: 'ONE PIECE', image: onePiece, featured: false },
-    { id: 5, title: 'MY HERO ACADEMIA', image: myHero, featured: false },
-    { id: 6, title: 'DEMON SLAYER', image: '/api/placeholder/300/400', featured: false },
-    { id: 7, title: 'ATTACK ON TITAN', image: '/api/placeholder/300/400', featured: false },
+    { 
+      id: 1, 
+      title: 'SPY FAMILY', 
+      image: spyFamily, 
+      featured: false 
+    },
+    { 
+      id: 2, 
+      title: 'FRIEREN', 
+      image: freeren, 
+      featured: true 
+    },
+    { 
+      id: 3, 
+      title: 'NARUTO', 
+      image: naruto, 
+      featured: false 
+    },
+    { 
+      id: 4, 
+      title: 'ONE PIECE', 
+      image: onePiece, 
+      featured: false 
+    },
+    { 
+      id: 5, 
+      title: 'MY HERO ACADEMIA', 
+      image: myHero, 
+      featured: false 
+    },
   ]
 
+  // ... (resto do código permanece igual)
   const scrollToIndex = (index) => {
     if (carouselRef.current) {
       setNavActive(true)
@@ -38,7 +63,6 @@ const AnimeCarousel = () => {
         })
         setCurrentIndex(index)
         
-        // Remove a classe de navegação após a animação
         setTimeout(() => {
           setNavActive(false)
         }, 400)
@@ -66,7 +90,6 @@ const AnimeCarousel = () => {
     }
   }
 
-  // Efeito para highlight automático do card central
   useEffect(() => {
     const handleResize = () => {
       if (carouselRef.current) {

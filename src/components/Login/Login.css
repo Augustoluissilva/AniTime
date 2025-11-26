@@ -1,0 +1,254 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Coluna esquerda com formulário */
+.left-column-login {
+  flex: 1;
+  background: #C9A3FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  position: relative;
+}
+
+.card-login {
+  background: #C9A3FF;
+  border-radius: 40px;
+  padding: 60px 50px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.title-login {
+  font-size: 42px;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 40px;
+  text-align: center;
+  font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+}
+
+.form-login {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.input-group-login {
+  width: 100%;
+}
+
+.input-field-login {
+  width: 100%;
+  padding: 20px 25px;
+  background: #E6D4FF;
+  border: none;
+  border-radius: 20px;
+  font-size: 18px;
+  color: #333;
+  outline: none;
+  transition: all 0.3s ease;
+  font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+}
+
+.input-field-login::placeholder {
+  color: #999;
+  font-weight: normal;
+}
+
+.input-field-login:focus {
+  background: #F0E6FF;
+  box-shadow: 0 0 0 3px rgba(201, 163, 255, 0.5);
+}
+
+.submit-button-login {
+  padding: 20px 25px;
+  background: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #000;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+}
+
+.submit-button-login:hover {
+  background: #F5F5F5;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.submit-button-login:active {
+  transform: translateY(0);
+}
+
+/* Link de registro */
+.register-link {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 16px;
+  color: #000;
+}
+
+.register-link span {
+  font-weight: normal;
+}
+
+.register-button {
+  color: #000;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.register-button:hover {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: #000;
+  transform: translateY(-1px);
+}
+
+.anime-text-login {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #000;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  font-family: 'MS Gothic', 'Yu Gothic', sans-serif;
+}
+
+/* Coluna direita com imagem */
+.right-column-login {
+  flex: 1;
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), 
+              url('../../assets/naruto.png');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.image-overlay-login {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.back-button {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  color: #000;
+  text-decoration: none;
+  padding: 12px 24px;
+  border: 2px solid #000;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+}
+
+.back-button:hover {
+  background: #000;
+  color: #C9A3FF;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column-reverse;
+  }
+  
+  .left-column-login,
+  .right-column-login {
+    flex: none;
+    height: 50vh;
+  }
+  
+  .card-login {
+    padding: 40px 30px;
+    margin: 20px;
+  }
+  
+  .title-login {
+    font-size: 36px;
+  }
+  
+  .anime-text-login {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    margin-top: 20px;
+  }
+
+  .register-link {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    flex-direction: column-reverse;
+  }
+  
+  .left-column-login {
+    padding: 20px;
+  }
+  
+  .card-login {
+    padding: 30px 20px;
+    margin: 10px;
+  }
+  
+  .title-login {
+    font-size: 32px;
+    margin-bottom: 30px;
+  }
+  
+  .input-field-login {
+    padding: 16px 20px;
+    font-size: 16px;
+  }
+  
+  .submit-button-login {
+    padding: 16px 20px;
+    font-size: 18px;
+  }
+  
+  .back-button {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .register-link {
+    font-size: 14px;
+  }
+}

@@ -1,5 +1,6 @@
 import React from 'react'
-import narutoImage from '../assets/naruto.png'
+import narutoImage from '../../assets/naruto.png'
+import './WelcomeSection.css'
 
 const WelcomeSection = () => {
   return (

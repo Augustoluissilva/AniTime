@@ -1,0 +1,18 @@
+/* Footer */
+.footer {
+  background: var(--dark-purple);
+  padding: 2rem 0;
+  border-top: 1px solid rgba(160, 102, 255, 0.2);
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 0 2rem;
+}
+
+.footer p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}

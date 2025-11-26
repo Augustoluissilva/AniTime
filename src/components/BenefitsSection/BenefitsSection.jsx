@@ -1,5 +1,6 @@
 import React from 'react'
-import onePieceImage from '../assets/one_piece.png'
+import onePieceImage from '../../assets/one_piece.png'
+import './BenefitsSection.css'
 
 const BenefitsSection = () => {
   const benefits = [
