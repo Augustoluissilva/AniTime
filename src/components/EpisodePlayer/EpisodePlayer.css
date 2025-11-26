@@ -1,0 +1,49 @@
+/* src/components/EpisodePlayer/EpisodePlayer.css */
+.episode-player-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--black-violet); /* Do App.css */
+  padding: 2rem;
+  color: var(--white);
+}
+
+.episode-title {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.player-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 1280px;
+  /* Proporção 16:9 */
+  aspect-ratio: 16 / 9;
+  box-shadow: 0 0 30px rgba(160, 102, 255, 0.4);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.react-player {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.player-loading, .player-error {
+  font-size: 1.5rem;
+  color: var(--neon-purple);
+  padding: 50px;
+}
+
+.playback-note {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+
+/* Adicione responsividade conforme necessário */
