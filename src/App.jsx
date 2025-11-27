@@ -1,42 +1,18 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/Header/Header'
-import AnimeCarousel from './components/AnimeCarousel/AnimeCarousel'
+// --- NOVAS IMPORTAÇÕES PARA O LAYOUT E HOMEPAGE ---
+import Footer from './components/Footer/Footer'
 import WelcomeSection from './components/WelcomeSection/WelcomeSection'
 import BenefitsSection from './components/BenefitsSection/BenefitsSection'
-import Footer from './components/Footer/Footer'
+import AnimeCarousel from './components/AnimeCarousel/AnimeCarousel'
+// --------------------------------------------------
 import Cadastro from './components/Cadastro/Cadastro'
 import Login from './components/Login/Login'
+import EpisodePlayer from './components/EpisodePlayer/EpisodePlayer'
 import './App.css'
 
-// Componente para a página Play
-const PlayPage = () => (
-  <div style={{ 
-    padding: '2rem', 
-    textAlign: 'center', 
-    minHeight: '60vh', 
-    background: '#0A0014', 
-    color: 'white',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center'
-  }}>
-    <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎮 Página Play</h1>
-    <p style={{ fontSize: '1.2rem' }}>Esta é a página de reprodução de animes.</p>
-  </div>
-)
-
-// Componente Home
-const HomePage = () => (
-  <>
-    <AnimeCarousel />
-    <WelcomeSection />
-    <BenefitsSection />
-  </>
-)
-
-// Layout com Header e Footer
+// [DEFINIÇÃO] Componente de Layout que envolve a página com Header e Footer.
 const Layout = ({ children }) => (
   <>
     <Header />
@@ -45,15 +21,40 @@ const Layout = ({ children }) => (
   </>
 )
 
+// [DEFINIÇÃO] Componente da Página Inicial, agrupando as seções.
+const HomePage = () => (
+  <>
+    <WelcomeSection />
+    <AnimeCarousel />
+    <BenefitsSection />
+  </>
+)
+
+// [DEFINIÇÃO] Componente da Página Play (Exemplo, usando o carrossel).
+const PlayPage = () => (
+  <div style={{ minHeight: '80vh', padding: '4rem 2rem', background: 'var(--purple-bg)' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <h1 style={{ color: 'var(--neon-purple)', textAlign: 'center', marginBottom: '3rem' }}>
+        Mais Animes!
+      </h1>
+      <AnimeCarousel />
+    </div>
+  </div>
+)
+
 function App() {
+  // A cor roxa (var(--neon-purple)) e var(--purple-bg) são do App.css
   return (
     <Router>
       <div className="App">
         <Routes>
+          {/* Agora, Layout e HomePage estão definidos */}
           <Route path="/" element={<Layout><HomePage /></Layout>} />
           <Route path="/play" element={<Layout><PlayPage /></Layout>} />
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/login" element={<Login />} />
+          {/* Rota para assistir: /watch/spy-family/1 */}
+          <Route path="/watch/:animeId/:episodeId" element={<EpisodePlayer />} />
         </Routes>
       </div>
     </Router>
