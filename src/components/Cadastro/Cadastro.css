@@ -1,3 +1,19 @@
+/* Variáveis de cores e estilos para Cadastro */
+:root {
+  --deep-space: #0f0c29;
+  --space-purple: #1a1a40;
+  --neon-purple: #8a2be2;
+  --neon-pink: #ff00ff;
+  --electric-blue: #00ffff;
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --error-color: #ff6b6b;
+  --success-color: #51cf66;
+}
+
+/* Reset e estilos base */
 * {
   margin: 0;
   padding: 0;
@@ -5,230 +21,493 @@
 }
 
 body {
-  font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+  font-family: 'Inter', 'Roboto', 'Poppins', sans-serif;
+  background: var(--deep-space);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-.container {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
-}
-
-/* Coluna esquerda com imagem */
-.left-column {
-  flex: 1;
-  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), 
-              url('../../assets/one_piece.png');
-  background-size: cover;
-  background-position: center;
-  position: relative;
+/* Container principal do Cadastro */
+.cadastro-container {
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, var(--deep-space) 0%, #1a1a40 50%, #302b63 100%);
+  position: relative;
 }
 
-.image-overlay {
+.cadastro-container::before {
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(138, 43, 226, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(0, 255, 255, 0.05) 0%, transparent 50%);
+  pointer-events: none;
 }
 
-.anime-text {
+/* Layout do conteúdo do Cadastro */
+.cadastro-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  max-width: 1200px;
+  height: 700px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   position: relative;
-  z-index: 2;
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
-  text-align: center;
-  font-family: 'MS Gothic', 'Yu Gothic', sans-serif;
 }
 
-/* Coluna direita com card */
-.right-column {
-  flex: 1;
-  background: #C9A3FF;
+/* Coluna da imagem (ESQUERDA no Cadastro) */
+.cadastro-image-column {
+  order: 1;
+  position: relative;
+  background: linear-gradient(135deg, #1a1a40, #302b63);
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Imagem específica do Maid Dragon para Cadastro - MODIFICADA */
+.cadastro-image-column::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('https://a.storyblok.com/f/178900/850x1200/5d793bc27b/miss-kobayashi-s-dragon-maid-a-lonely-dragon-wants-to-be-loved-kv.jpeg/m/filters:quality(95)format(webp)');
+  background-size: cover;
+  background-position: center 25%;
+  background-repeat: no-repeat;
+  opacity: 1;
+  filter: brightness(1.1) contrast(1.05) saturate(1.1);
+}
+
+/* Coluna do formulário (DIREITA no Cadastro) */
+.cadastro-form-column {
+  order: 2;
+}
+
+/* Cartão de vidro (Glassmorphism) */
+.cadastro-glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
   padding: 40px;
-}
-
-.card {
-  background: #C9A3FF;
-  border-radius: 40px;
-  padding: 60px 50px;
-  width: 100%;
-  max-width: 500px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-.title {
-  font-size: 42px;
-  font-weight: bold;
-  color: #000;
-  margin-bottom: 40px;
-  text-align: center;
-  font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
-}
-
-.form {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.input-group {
-  width: 100%;
+.cadastro-glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(138, 43, 226, 0.1) 0%, 
+    rgba(255, 0, 255, 0.05) 50%, 
+    rgba(0, 255, 255, 0.1) 100%);
+  pointer-events: none;
 }
 
-.input-field {
+/* Cabeçalho do cartão */
+.cadastro-card-header {
+  text-align: center;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 2;
+}
+
+.cadastro-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+
+.cadastro-accent-line {
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--neon-purple), var(--neon-pink));
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+/* Formulário */
+.cadastro-form {
+  position: relative;
+  z-index: 2;
+}
+
+/* Mensagem de erro */
+.cadastro-error-message {
+  color: var(--error-color);
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  padding: 12px;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  backdrop-filter: blur(10px);
+  animation: cadastro-fadeIn 0.3s ease;
+}
+
+@keyframes cadastro-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cadastro-input-group {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.cadastro-input-field {
   width: 100%;
-  padding: 20px 25px;
-  background: #E6D4FF;
-  border: none;
-  border-radius: 20px;
-  font-size: 18px;
-  color: #333;
-  outline: none;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 1rem;
   transition: all 0.3s ease;
-  font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+  outline: none;
 }
 
-.input-field::placeholder {
-  color: #999;
-  font-weight: normal;
+.cadastro-input-field::placeholder {
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
 }
 
-.input-field:focus {
-  background: #F0E6FF;
-  box-shadow: 0 0 0 3px rgba(201, 163, 255, 0.5);
+.cadastro-input-field:focus {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--neon-purple);
+  box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2);
+  transform: translateY(-1px);
 }
 
-.submit-button {
-  padding: 20px 25px;
-  background: white;
+.cadastro-input-field:focus::placeholder {
+  color: transparent;
+}
+
+.cadastro-input-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  filter: blur(8px);
+}
+
+.cadastro-input-field:focus + .cadastro-input-glow {
+  opacity: 0.4;
+}
+
+/* Botão de submit */
+.cadastro-submit-button {
+  position: relative;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
   border: none;
-  border-radius: 20px;
-  font-size: 20px;
-  font-weight: bold;
-  color: #000;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 10px;
-  font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+  overflow: hidden;
+  margin-top: 8px;
+  isolation: isolate;
 }
 
-.submit-button:hover {
-  background: #F5F5F5;
+.cadastro-submit-button:hover:not(.loading) {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 
+    0 10px 25px rgba(138, 43, 226, 0.4),
+    0 0 30px rgba(138, 43, 226, 0.2);
 }
 
-.submit-button:active {
+.cadastro-submit-button:active {
   transform: translateY(0);
 }
 
-.back-button {
-  display: block;
+.cadastro-submit-button.loading {
+  opacity: 0.8;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cadastro-button-glow {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.6), 
+    transparent);
+  transition: left 0.7s ease;
+  z-index: -1;
+}
+
+.cadastro-submit-button:hover:not(.loading) .cadastro-button-glow {
+  left: 100%;
+}
+
+.cadastro-button-text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Loading animation */
+.cadastro-submit-button.loading .cadastro-button-text::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: cadastro-spin 1s linear infinite;
+}
+
+@keyframes cadastro-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Links de autenticação */
+.cadastro-links {
   text-align: center;
-  margin-top: 20px;
-  color: #000;
+  margin-top: 24px;
+}
+
+.cadastro-toggle-mode {
+  background: none;
+  border: none;
+  color: var(--electric-blue);
+  cursor: pointer;
+  font-size: 0.9rem;
   text-decoration: none;
-  padding: 12px 24px;
-  border: 2px solid #000;
-  border-radius: 20px;
   transition: all 0.3s ease;
-  font-weight: bold;
-  font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+  display: block;
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
 }
 
-.back-button:hover {
-  background: #000;
-  color: #C9A3FF;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+.cadastro-toggle-mode::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(0, 255, 255, 0.1), 
+    transparent);
+  transition: left 0.5s ease;
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
+.cadastro-toggle-mode:hover {
+  color: var(--neon-pink);
+  background: rgba(0, 255, 255, 0.05);
+}
+
+.cadastro-toggle-mode:hover::before {
+  left: 100%;
+}
+
+/* Texto anime */
+.cadastro-anime-text {
+  text-align: center;
+  margin-top: 30px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  opacity: 0.7;
+  font-family: 'MS Gothic', 'Yu Gothic', monospace;
+}
+
+/* Elementos flutuantes futuristas */
+.cadastro-floating-elements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+}
+
+.cadastro-floating-element {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--neon-purple), var(--electric-blue));
+  opacity: 0.1;
+  animation: cadastro-float 6s ease-in-out infinite;
+  filter: blur(1px);
+}
+
+.cadastro-element-1 {
+  width: 120px;
+  height: 120px;
+  top: 15%;
+  left: 15%;
+  animation-delay: 0s;
+  background: linear-gradient(135deg, var(--neon-purple), transparent 70%);
+}
+
+.cadastro-element-2 {
+  width: 80px;
+  height: 80px;
+  top: 65%;
+  left: 75%;
+  animation-delay: 2s;
+  background: linear-gradient(135deg, var(--neon-pink), transparent 70%);
+}
+
+.cadastro-element-3 {
+  width: 100px;
+  height: 100px;
+  top: 35%;
+  left: 55%;
+  animation-delay: 4s;
+  background: linear-gradient(135deg, var(--electric-blue), transparent 70%);
+}
+
+/* Animações específicas do Cadastro */
+@keyframes cadastro-float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
   }
-  
-  .left-column,
-  .right-column {
-    flex: none;
-    height: 50vh;
+  33% {
+    transform: translateY(-20px) rotate(120deg) scale(1.1);
   }
-  
-  .card {
-    padding: 40px 30px;
-    margin: 20px;
+  66% {
+    transform: translateY(10px) rotate(240deg) scale(0.9);
   }
-  
-  .title {
-    font-size: 36px;
+}
+
+/* Responsividade do Cadastro */
+@media (max-width: 968px) {
+  .cadastro-content {
+    grid-template-columns: 1fr;
+    height: auto;
+    max-width: 500px;
   }
 
-  .input-field {
-    padding: 16px 20px;
-    font-size: 16px;
+  .cadastro-image-column {
+    display: none;
   }
 
-  .submit-button {
-    padding: 16px 20px;
-    font-size: 18px;
+  .cadastro-glass-card {
+    padding: 30px 25px;
   }
 
-  .anime-text {
-    font-size: 20px;
+  .cadastro-title {
+    font-size: 2rem;
+  }
+
+  .cadastro-form-column {
+    order: 1;
   }
 }
 
 @media (max-width: 480px) {
-  .container {
-    flex-direction: column;
+  .cadastro-container {
+    padding: 10px;
+  }
+
+  .cadastro-glass-card {
+    padding: 25px 20px;
+    border-radius: 16px;
+  }
+
+  .cadastro-title {
+    font-size: 1.8rem;
+  }
+
+  .cadastro-input-field {
+    padding: 14px 16px;
+    font-size: 0.9rem;
+  }
+
+  .cadastro-submit-button {
+    padding: 14px;
+    font-size: 1rem;
+  }
+
+  .cadastro-error-message {
+    font-size: 0.8rem;
+    padding: 10px;
+  }
+}
+
+/* Melhorias de acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  .cadastro-floating-element,
+  .cadastro-button-glow,
+  .cadastro-toggle-mode::before {
+    animation: none;
   }
   
-  .left-column,
-  .right-column {
-    height: 50vh;
+  .cadastro-submit-button:hover:not(.loading) {
+    transform: none;
   }
   
-  .right-column {
-    padding: 20px;
+  .cadastro-input-field:focus {
+    transform: none;
   }
-  
-  .card {
-    padding: 30px 20px;
-    margin: 10px;
-  }
-  
-  .title {
-    font-size: 32px;
-    margin-bottom: 30px;
-  }
-  
-  .input-field {
-    padding: 14px 18px;
-    font-size: 16px;
-  }
-  
-  .submit-button {
-    padding: 14px 18px;
-    font-size: 16px;
-  }
-  
-  .back-button {
-    padding: 10px 20px;
-    font-size: 14px;
-  }
-  
-  .anime-text {
-    font-size: 18px;
-    padding: 0 20px;
-  }
+}
+
+/* Focus visível para acessibilidade */
+.cadastro-input-field:focus-visible,
+.cadastro-submit-button:focus-visible,
+.cadastro-toggle-mode:focus-visible {
+  outline: 2px solid var(--electric-blue);
+  outline-offset: 2px;
 }

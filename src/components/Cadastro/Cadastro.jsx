@@ -63,79 +63,108 @@ const Cadastro = () => {
   }
 
   return (
-    <div className="container">
-      {/* Coluna esquerda com imagem - vai usar a imagem do CSS */}
-      <div className="left-column">
-        <div className="image-overlay"></div>
-        <div className="anime-text">小树枝的从仆子中</div>
-      </div>
-      
-      {/* Coluna direita com formulário */}
-      <div className="right-column">
-        <div className="card">
-          <h1 className="title">Cadastre-se</h1>
-          
-          <form className="form" onSubmit={handleSubmit}>
-            
-            {error && <p style={{color: 'red', textAlign: 'center'}}>{error}</p>}
-            
-            <div className="input-group">
-              <input 
-                type="text" 
-                placeholder="Name"
-                className="input-field"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
+    <div className="cadastro-container">
+      <div className="cadastro-content">
+        
+        {/* Coluna da Imagem - ESQUERDA no Cadastro */}
+        <div className="cadastro-image-column">
+          <div className="scanline"></div>
+          <div className="cadastro-image-overlay">
+            <div className="cadastro-floating-elements">
+              <div className="cadastro-floating-element cadastro-element-1"></div>
+              <div className="cadastro-floating-element cadastro-element-2"></div>
+              <div className="cadastro-floating-element cadastro-element-3"></div>
             </div>
-            
-            <div className="input-group">
-              <input 
-                type="email" 
-                placeholder="E-mail"
-                className="input-field"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="input-group">
-              <input 
-                type="password" 
-                placeholder="Senha"
-                className="input-field"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="input-group">
-              <input 
-                type="password" 
-                placeholder="Confirmar Senha"
-                className="input-field"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
-            
-            <button type="submit" className="submit-button" disabled={loading}>
-              {loading ? 'Cadastrando...' : 'Cadastrar'}
-            </button>
+          </div>
+        </div>
 
-            {/* Botão Voltar */}
-            <Link to="/" className="back-button">
-              Voltar para Home
-            </Link>
-          </form>
+        {/* Coluna do Formulário - DIREITA no Cadastro */}
+        <div className="cadastro-form-column">
+          <div className="cadastro-glass-card">
+            <div className="cadastro-card-header">
+              <h1 className="cadastro-title">Cadastre-se</h1>
+              <div className="cadastro-accent-line"></div>
+            </div>
+
+            <form className="cadastro-form" onSubmit={handleSubmit}>
+              
+              {error && <p className="cadastro-error-message">{error}</p>}
+              
+              <div className="cadastro-input-group">
+                <input 
+                  type="text" 
+                  placeholder="Name"
+                  className="cadastro-input-field"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+                <div className="cadastro-input-glow"></div>
+              </div>
+              
+              <div className="cadastro-input-group">
+                <input 
+                  type="email" 
+                  placeholder="E-mail"
+                  className="cadastro-input-field"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                <div className="cadastro-input-glow"></div>
+              </div>
+              
+              <div className="cadastro-input-group">
+                <input 
+                  type="password" 
+                  placeholder="Senha"
+                  className="cadastro-input-field"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <div className="cadastro-input-glow"></div>
+              </div>
+              
+              <div className="cadastro-input-group">
+                <input 
+                  type="password" 
+                  placeholder="Confirmar Senha"
+                  className="cadastro-input-field"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+                <div className="cadastro-input-glow"></div>
+              </div>
+              
+              <button 
+                type="submit" 
+                className={`cadastro-submit-button ${loading ? 'loading' : ''}`}
+                disabled={loading}
+              >
+                <span className="cadastro-button-text">
+                  {loading ? 'Cadastrando...' : 'Cadastrar'}
+                </span>
+                <div className="cadastro-button-glow"></div>
+              </button>
+
+              <div className="cadastro-links">
+                <Link to="/login" className="cadastro-toggle-mode">
+                  Já tem uma conta? Faça login
+                </Link>
+              </div>
+
+              {/* Texto decorativo anime */}
+              <div className="cadastro-anime-text">
+                小树枝的从仆子中
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Cadastro
+export default Cadastro;
