@@ -1,16 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react' 
 import { useParams, Link } from 'react-router-dom' 
 import Hls from 'hls.js' 
 import { 
     doc, 
     getDoc, 
+    setDoc,
     collection, 
     query, 
     where, 
     getDocs 
 } from 'firebase/firestore' 
-import { db } from '../../firebase/config' 
+import { onAuthStateChanged } from 'firebase/auth' 
+import { db, auth } from '../../firebase/config' 
 import './EpisodePlayer.css'
+
+const PROGRESS_SAVE_INTERVAL_MS = 10000; 
 
 // [COMPONENTE] Seletor de Episódios (Mantido)
 const EpisodeSelector = ({ animeId, episodesList, currentEpisodeId }) => {
@@ -49,22 +53,112 @@ const EpisodeSelector = ({ animeId, episodesList, currentEpisodeId }) => {
 
 const EpisodePlayer = () => {
     const { animeId, episodeId } = useParams()
-    const videoRef = useRef(null) 
+    
     const hlsRef = useRef(null) 
+    const videoRef = useRef(null) 
+    
     const [videoUrl, setVideoUrl] = useState(null)
     const [episodeTitle, setEpisodeTitle] = useState('Carregando...')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [episodesList, setEpisodesList] = useState([]) 
+    
+    const [initialTime, setInitialTime] = useState(0)
+    const progressUpdateTimer = useRef(null)
+    const [userId, setUserId] = useState(null); 
 
-    // EFEITO 1: Busca os dados do episódio no Firestore 
-    useEffect(() => {
-        const fetchEpisodeData = async () => {
+
+    // [FUNÇÃO MEMORIZADA] Constrói o ID único para salvar o progresso.
+    const getProgressDocId = useCallback(() => {
+        return `${userId || 'anon_user'}_${animeId}_${episodeId}`;
+    }, [userId, animeId, episodeId]); 
+    
+    // [FUNÇÃO MEMORIZADA] Salva o progresso do vídeo no Firestore.
+    const savePlaybackProgress = useCallback(async (currentTime, isFinished = false) => {
+        if (!userId) return; 
+
+        const docId = getProgressDocId();
+        const video = videoRef.current; 
+        if (!video) return;
+
+        const isNearEnd = video.duration && (currentTime / video.duration) > 0.98;
+        
+        if (isFinished || isNearEnd) { 
+             const progressData = {
+                animeId: animeId,
+                episodeId: episodeId,
+                timestamp: Date.now(),
+                currentTime: 0, 
+                finished: true 
+            };
             try {
-                setLoading(true)
+                await setDoc(doc(db, 'userProgress', docId), progressData);
+                console.log(`[SAVE] Progresso FINALIZADO salvo para: ${docId}`);
+            } catch (e) {
+                console.error(`[ERROR] Falha ao salvar progresso finalizado para ${docId}:`, e);
+            }
+            return;
+        }
+
+        const progressData = {
+            animeId: animeId,
+            episodeId: episodeId,
+            timestamp: Date.now(),
+            currentTime: Math.floor(currentTime),
+            finished: false
+        };
+
+        try {
+            await setDoc(doc(db, 'userProgress', docId), progressData);
+        } catch (e) {
+            console.error(`[ERROR] Falha ao salvar progresso para ${docId}:`, e);
+        }
+    }, [userId, animeId, episodeId, getProgressDocId]); 
+    
+    // [FUNÇÃO MEMORIZADA] Busca o progresso salvo no Firestore.
+    const getPlaybackProgress = useCallback(async () => {
+        if (!userId) return 0;
+        
+        try {
+            const docRef = doc(db, 'userProgress', getProgressDocId()); 
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const savedTime = data.currentTime || 0;
+                console.log(`[LOAD] Progresso encontrado para ${docRef.id}: ${savedTime}s`);
+                return data.finished ? 0 : savedTime; 
+            } else {
+                console.log(`[LOAD] Nenhum progresso encontrado para ${docRef.id}.`);
+                return 0;
+            }
+        } catch (e) {
+            console.error("[ERROR] Falha ao buscar progresso:", e);
+            return 0;
+        }
+    }, [userId, animeId, episodeId, getProgressDocId]);
+
+
+    // [EFEITO 0] Resolve o estado de autenticação (Configura o userId).
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            const newUserId = user ? user.uid : 'anon_user';
+            setUserId(newUserId); 
+        });
+        return () => unsubscribe();
+    }, []); 
+
+
+    // [EFEITO 1] Busca os dados do episódio e o progresso do usuário.
+    useEffect(() => {
+        if (!userId) return;
+
+        const fetchEpisodeAndProgress = async () => {
+            try {
+                setLoading(true) 
                 setError(null)
                 
-                // --- 1. BUSCA DA LISTA DE EPISÓDIOS (com correção para frieren) ---
+                // --- 1. BUSCA DA LISTA DE EPISÓDIOS (Manter código original)
                 let fetchedEpisodes = [];
                 if (animeId === 'frieren') {
                      fetchedEpisodes = [
@@ -93,132 +187,167 @@ const EpisodePlayer = () => {
                 
                 setEpisodesList(fetchedEpisodes);
 
-                // --- 2. BUSCA DO EPISÓDIO ATUAL (O fetch principal) ---
+                // --- 2. BUSCA DO EPISÓDIO ATUAL ---
                 const paddedEpisodeId = episodeId.padStart(2, '0');
                 const currentDocumentId = `${animeId}_s01e${paddedEpisodeId}`; 
 
                 const episodeDocRef = doc(db, 'episodes', currentDocumentId)
                 const episodeDoc = await getDoc(episodeDocRef)
+                
+                let fetchedVideoUrl = null;
+                let finalTitle = `Episódio ${episodeId}`;
 
                 if (episodeDoc.exists()) {
                     const data = episodeDoc.data()
-                    setVideoUrl(data.hlsUrl) 
-                    const finalTitle = data.title || fetchedEpisodes.find(ep => ep.episodeId === episodeId)?.title || `Episódio ${episodeId}`;
-                    setEpisodeTitle(finalTitle)
-
+                    fetchedVideoUrl = data.hlsUrl;
+                    finalTitle = data.title || fetchedEpisodes.find(ep => ep.episodeId === episodeId)?.title || finalTitle;
                 } else {
-                    if (fetchedEpisodes.length === 0) {
-                        setError(`Nenhum episódio encontrado para o anime: ${animeId}.`);
-                    } else {
-                        setError(`Episódio não encontrado. ID esperado no Firestore: ${currentDocumentId}`)
-                    }
-                    setVideoUrl(null); 
+                    const msg = `Episódio não encontrado. ID esperado no Firestore: ${currentDocumentId}`;
+                    setError(msg);
+                    fetchedVideoUrl = null; 
                 }
+
+                setVideoUrl(fetchedVideoUrl)
+                setEpisodeTitle(finalTitle)
+
+                // --- 3. BUSCA DO PROGRESSO DO USUÁRIO ---
+                if (fetchedVideoUrl) {
+                    const savedTime = await getPlaybackProgress();
+                    setInitialTime(savedTime);
+                }
+
+
             } catch (err) {
-                console.error("Erro ao buscar dados do episódio ou lista:", err)
                 setError('Erro ao conectar ou buscar dados do serviço de metadados.')
+                setVideoUrl(null); 
             } finally {
                 setLoading(false)
             }
         }
         
-        fetchEpisodeData()
+        fetchEpisodeAndProgress()
         
-        // Limpeza de estado na desmontagem
         return () => {
-            setVideoUrl(null); 
-            setEpisodeTitle('Carregando...');
-            setLoading(true);
-            setError(null);
+            if (progressUpdateTimer.current) { 
+                clearInterval(progressUpdateTimer.current);
+            }
         };
-    }, [animeId, episodeId]) 
+    }, [animeId, episodeId, userId, getPlaybackProgress]) 
 
-    // EFEITO 2: Lógica para inicializar/re-inicializar o HLS.js (CORRIGIDO PARA ESTABILIDADE)
-    useEffect(() => {
-        const video = videoRef.current;
-        const source = videoUrl;
+    
+    // [CALLBACK REF] Funções que inicializa e limpa o player (Substitui Effect 2 e Effect 3)
+    const setVideoElement = useCallback(node => {
         
-        // Destrói qualquer instância HLS anterior, garantindo que o vídeo anterior pare de carregar
+        // 1. Limpeza de estados anteriores
         if (hlsRef.current) {
             hlsRef.current.destroy();
             hlsRef.current = null;
         }
-
-        // Se não houver URL ou elemento de vídeo, limpa e sai
-        if (!source || !video) {
-            if (video) {
-                video.src = ""; 
-                video.load(); 
+        if (progressUpdateTimer.current) { 
+            clearInterval(progressUpdateTimer.current);
+            progressUpdateTimer.current = null;
+        }
+        
+        videoRef.current = node; 
+        
+        if (!node || !videoUrl) {
+            if (node) { 
+                node.src = ""; 
+                node.load();
             }
             return;
         }
+        
+        const video = node;
+        const source = videoUrl;
+        
+        // FIX: Mova a declaração de handleVideoEnded para o topo, antes de ser usada
+        const handleVideoEnded = () => {
+            savePlaybackProgress(0, true);
+        };
 
         // Função de reprodução que garante que o player está pronto
         const startPlayback = () => {
-            video.play().catch(e => console.error("Erro ao tentar autoPlay:", e));
-        }
-        
-        // Suporte nativo (Safari e outros)
-        if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            // Limpa o source do vídeo antes de carregar o novo.
-            if (video.src !== source) {
-                video.src = source;
-                video.load(); 
+            if (initialTime > 0) {
+                video.currentTime = initialTime;
             }
             
-            // FIX: Espera o metadado carregar antes de dar play (para vídeo/tempo aparecer)
+            video.play().catch(e => console.error("[PLAYER] Erro ao tentar autoPlay:", e));
+            
+            // Inicia o timer para salvar o progresso periodicamente
+            progressUpdateTimer.current = setInterval(() => {
+                if (!video.paused && !video.ended) {
+                    savePlaybackProgress(video.currentTime);
+                }
+            }, PROGRESS_SAVE_INTERVAL_MS);
+        }
+
+        // --- Lógica de Inicialização do Player ---
+
+        // Suporte nativo (Safari e outros)
+        if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = source;
+            video.load(); 
+            
             const handleMetadataLoaded = () => {
                 startPlayback();
-                video.removeEventListener('loadedmetadata', handleMetadataLoaded);
             }
             
             video.addEventListener('loadedmetadata', handleMetadataLoaded);
-            
-            // Retorna a função de limpeza 
+            video.addEventListener('ended', handleVideoEnded); // AGORA ESTÁ EM ESCOPO
+
             return () => {
                 video.removeEventListener('loadedmetadata', handleMetadataLoaded);
-                video.src = "";
-                video.load();
+                video.removeEventListener('ended', handleVideoEnded);
             };
         }
         
         // HLS.js para navegadores sem suporte nativo
         else if (Hls.isSupported()) {
+            
             const hls = new Hls();
-            hlsRef.current = hls; // Armazena a nova instância na ref
+            hlsRef.current = hls;
             hls.attachMedia(video);
             
             hls.on(Hls.Events.MEDIA_ATTACHED, function () {
                 hls.loadSource(source);
             });
             
-            // FIX: Usar o evento nativo 'loadedmetadata' para sincronizar o início do play 
-            // após o HLS.js analisar o manifesto e carregar os metadados.
             const handleHlsMetadataLoaded = () => {
                 startPlayback();
-                video.removeEventListener('loadedmetadata', handleHlsMetadataLoaded);
             };
 
             video.addEventListener('loadedmetadata', handleHlsMetadataLoaded);
-            
-            // Função de limpeza: Destruir a instância HLS e remover o listener
+            video.addEventListener('ended', handleVideoEnded); // AGORA ESTÁ EM ESCOPO
+
+            hls.on(Hls.Events.ERROR, function (event, data) {
+                if (data.fatal) {
+                    setError(`Erro crítico no HLS.js: ${data.details}`);
+                }
+            });
+
             return () => {
                 video.removeEventListener('loadedmetadata', handleHlsMetadataLoaded);
+                video.removeEventListener('ended', handleVideoEnded);
                 if (hlsRef.current) {
                     hlsRef.current.destroy();
                     hlsRef.current = null;
                 }
             };
         } else {
-            console.error("HLS não é suportado por este navegador.");
             setError("O formato HLS não é suportado por este navegador.")
         }
-        // A dependência é apenas videoUrl
-    }, [videoUrl]) 
+        
+    }, [videoUrl, initialTime, savePlaybackProgress]); 
 
-    if (loading) {
+
+    // --- RENDERIZAÇÃO (JSX) ---
+
+    if (!userId || loading) {
         return <div className="player-loading">Carregando player...</div>
     }
+    
+    const isAnon = userId === 'anon_user';
 
     return (
         <div className="episode-player-container">
@@ -227,10 +356,9 @@ const EpisodePlayer = () => {
             {error && <div className="player-error">{error}</div>}
 
             <div className="player-wrapper" style={{ display: error ? 'none' : 'block' }}>
-                {/* [CORREÇÃO DE RENDERIZAÇÃO] Só renderiza a tag <video> se houver URL */}
-                {videoUrl ? (
+                {!error ? (
                     <video 
-                        ref={videoRef}
+                        ref={setVideoElement} // USANDO O CALLBACK REF
                         className="video-player" 
                         controls
                         autoPlay 
@@ -239,12 +367,25 @@ const EpisodePlayer = () => {
                         playsInline
                     ></video>
                 ) : (
-                    // Mensagem de erro mais clara se a URL não for encontrada no Firestore
-                    !error && <div className="player-error">Não foi possível encontrar a URL do vídeo. Verifique se o documento `{animeId}_s01e{episodeId.padStart(2, '0')}` existe no Firestore.</div>
+                    <div style={{ padding: '50px', color: 'gray' }}>Detalhes do erro acima.</div>
                 )}
             </div>
+            
+            {/* Nota de Retomada de Progresso */}
+            {initialTime > 0 && !error && (
+                <div className="playback-note">
+                    Retomando em {Math.floor(initialTime / 60)}m {initialTime % 60}s. Seu progresso é salvo automaticamente.
+                </div>
+            )}
+            
+            {/* Aviso de Usuário Deslogado */}
+            {isAnon && !error && (
+                <div className="playback-note" style={{ color: 'yellow', marginTop: '0.5rem' }}>
+                    ⚠️ Você está deslogado. Seu progresso está sendo salvo temporariamente. **Faça login para salvar de forma permanente!**
+                </div>
+            )}
 
-            {/* Renderiza o seletor de episódios com base na lista buscada */}
+            {/* Seletor de Episódios */}
             {episodesList.length > 0 && (
                 <EpisodeSelector 
                     animeId={animeId} 

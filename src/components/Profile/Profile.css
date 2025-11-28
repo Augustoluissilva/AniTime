@@ -1,0 +1,68 @@
+/* src/components/Profile/Profile.css */
+.profile-container {
+    min-height: 80vh;
+    padding: 4rem 2rem;
+    /* Variáveis do App.css */
+    background: var(--purple-bg); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--white);
+}
+
+.profile-card {
+    /* Variáveis do App.css */
+    background: var(--dark-purple); 
+    padding: 3rem;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(160, 102, 255, 0.4);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+
+.profile-title {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    /* Variável do App.css */
+    color: var(--neon-purple); 
+    font-weight: 300;
+}
+
+.profile-info p {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(160, 102, 255, 0.2);
+    word-wrap: break-word;
+}
+
+.profile-info strong {
+    /* Variável do App.css */
+    color: var(--light-purple); 
+    font-weight: 400;
+}
+
+.logout-button {
+    background: #ff5555;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1.5rem;
+}
+
+.logout-button:hover {
+    background: #ff3333;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 85, 85, 0.4);
+}
+
+.not-logged-in {
+    font-size: 1.2rem;
+    color: #ff5555;
+}
