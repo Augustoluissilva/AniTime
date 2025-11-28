@@ -1,70 +1,35 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import './Login.css';
+import React from 'react'
+import { Link } from 'react-router-dom'
+import './Login.css'
 
 const Login = () => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    
-    // Sua lógica de login aqui
-    setTimeout(() => {
-      setLoading(false)
-      console.log('Login attempt:', { email, password })
-    }, 1500)
-  }
-
   return (
-    <div className="login-container">
-      <div className="login-content">
-        
-        {/* Coluna do Formulário - ESQUERDA no Login */}
-        <div className="login-form-column">
-          <div className="login-glass-card">
-            <div className="login-card-header">
-              <h1 className="login-title">Login</h1>
-              <div className="login-accent-line"></div>
+    <div className="container">
+      {/* Coluna esquerda com formulário */}
+      <div className="left-column-login">
+        <div className="card-login">
+          <h1 className="title-login">Login</h1>
+          
+          <form className="form-login">
+            <div className="input-group-login">
+              <input 
+                type="email" 
+                placeholder="E-mail"
+                className="input-field-login"
+              />
             </div>
-
-            <form className="login-form" onSubmit={handleSubmit}>
-              <div className="login-input-group">
-                <input 
-                  type="email"
-                  placeholder="E-mail"
-                  className="login-input-field"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-                <div className="login-input-glow"></div>
-              </div>
-
-              <div className="login-input-group">
-                <input 
-                  type="password"
-                  placeholder="Senha"
-                  className="login-input-field"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <div className="login-input-glow"></div>
-              </div>
-
-              <button 
-                type="submit" 
-                className={`login-submit-button ${loading ? 'loading' : ''}`}
-                disabled={loading}
-              >
-                <span className="login-button-text">
-                  {loading ? 'Entrando...' : 'Entrar'}
-                </span>
-                <div className="login-button-glow"></div>
-              </button>
+            
+            <div className="input-group-login">
+              <input 
+                type="password" 
+                placeholder="Senha"
+                className="input-field-login"
+              />
+            </div>
+            
+            <button type="submit" className="submit-button-login">
+              Entrar
+            </button>
 
               <div className="login-links">
                 <Link to="/cadastro" className="login-toggle-mode">

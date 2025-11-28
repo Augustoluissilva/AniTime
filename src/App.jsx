@@ -1,3 +1,5 @@
+// src/App.jsx
+
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/Header/Header'
@@ -10,6 +12,8 @@ import AnimeCarousel from './components/AnimeCarousel/AnimeCarousel'
 import Cadastro from './components/Cadastro/Cadastro'
 import Login from './components/Login/Login'
 import EpisodePlayer from './components/EpisodePlayer/EpisodePlayer'
+// --- NOVA IMPORTAÇÃO: Profile ---
+import Profile from './components/Profile/Profile'
 import './App.css'
 
 // [DEFINIÇÃO] Componente de Layout que envolve a página com Header e Footer.
@@ -53,6 +57,8 @@ function App() {
           <Route path="/play" element={<Layout><PlayPage /></Layout>} />
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/login" element={<Login />} />
+          {/* ROTA DO PERFIL (NOVA) */}
+          <Route path="/perfil" element={<Layout><Profile /></Layout>} />
           {/* Rota para assistir: /watch/spy-family/1 */}
           <Route path="/watch/:animeId/:episodeId" element={<EpisodePlayer />} />
         </Routes>
