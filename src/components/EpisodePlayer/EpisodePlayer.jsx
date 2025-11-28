@@ -1,5 +1,3 @@
-// src/components/EpisodePlayer/EpisodePlayer.jsx
-
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom' 
 import Hls from 'hls.js' 
@@ -59,7 +57,7 @@ const EpisodePlayer = () => {
     const [error, setError] = useState(null)
     const [episodesList, setEpisodesList] = useState([]) 
 
-    // EFEITO 1: Busca os dados do episódio no Firestore (Mantido sem alterações para o mock de frieren)
+    // EFEITO 1: Busca os dados do episódio no Firestore 
     useEffect(() => {
         const fetchEpisodeData = async () => {
             try {
@@ -125,54 +123,87 @@ const EpisodePlayer = () => {
         }
         
         fetchEpisodeData()
+        
+        // Limpeza de estado na desmontagem
+        return () => {
+            setVideoUrl(null); 
+            setEpisodeTitle('Carregando...');
+            setLoading(true);
+            setError(null);
+        };
     }, [animeId, episodeId]) 
 
-    // EFEITO 2: Lógica para inicializar/re-inicializar o HLS.js (CORRIGIDA)
+    // EFEITO 2: Lógica para inicializar/re-inicializar o HLS.js (CORRIGIDO PARA ESTABILIDADE)
     useEffect(() => {
         const video = videoRef.current;
         const source = videoUrl;
         
-        // 1. Destrói qualquer instância HLS anterior 
+        // Destrói qualquer instância HLS anterior, garantindo que o vídeo anterior pare de carregar
         if (hlsRef.current) {
             hlsRef.current.destroy();
             hlsRef.current = null;
         }
 
-        // Se não houver URL, limpa e sai
+        // Se não houver URL ou elemento de vídeo, limpa e sai
         if (!source || !video) {
             if (video) {
-                video.src = ""; // Limpa a URL src
-                video.load();   // Força o elemento a recarregar sem source
+                video.src = ""; 
+                video.load(); 
             }
             return;
+        }
+
+        // Função de reprodução que garante que o player está pronto
+        const startPlayback = () => {
+            video.play().catch(e => console.error("Erro ao tentar autoPlay:", e));
         }
         
         // Suporte nativo (Safari e outros)
         if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            video.src = source;
-            video.load(); // ⬅️ Adiciona load() para forçar o carregamento imediato da nova fonte
-            video.play().catch(e => console.error("Erro ao tentar autoPlay no nativo:", e));
+            // Limpa o source do vídeo antes de carregar o novo.
+            if (video.src !== source) {
+                video.src = source;
+                video.load(); 
+            }
             
-            // Retorna a função de limpeza (só limpa a src)
+            // FIX: Espera o metadado carregar antes de dar play (para vídeo/tempo aparecer)
+            const handleMetadataLoaded = () => {
+                startPlayback();
+                video.removeEventListener('loadedmetadata', handleMetadataLoaded);
+            }
+            
+            video.addEventListener('loadedmetadata', handleMetadataLoaded);
+            
+            // Retorna a função de limpeza 
             return () => {
+                video.removeEventListener('loadedmetadata', handleMetadataLoaded);
                 video.src = "";
                 video.load();
             };
         }
         
         // HLS.js para navegadores sem suporte nativo
-        if (Hls.isSupported()) {
+        else if (Hls.isSupported()) {
             const hls = new Hls();
             hlsRef.current = hls; // Armazena a nova instância na ref
             hls.attachMedia(video);
             
             hls.on(Hls.Events.MEDIA_ATTACHED, function () {
                 hls.loadSource(source);
-                video.play().catch(e => console.error("Erro ao tentar autoPlay com HLS.js:", e));
             });
             
-            // Função de limpeza: Destruir a instância HLS
+            // FIX: Usar o evento nativo 'loadedmetadata' para sincronizar o início do play 
+            // após o HLS.js analisar o manifesto e carregar os metadados.
+            const handleHlsMetadataLoaded = () => {
+                startPlayback();
+                video.removeEventListener('loadedmetadata', handleHlsMetadataLoaded);
+            };
+
+            video.addEventListener('loadedmetadata', handleHlsMetadataLoaded);
+            
+            // Função de limpeza: Destruir a instância HLS e remover o listener
             return () => {
+                video.removeEventListener('loadedmetadata', handleHlsMetadataLoaded);
                 if (hlsRef.current) {
                     hlsRef.current.destroy();
                     hlsRef.current = null;
@@ -180,9 +211,10 @@ const EpisodePlayer = () => {
             };
         } else {
             console.error("HLS não é suportado por este navegador.");
+            setError("O formato HLS não é suportado por este navegador.")
         }
-        
-    }, [videoUrl]) // Dispara sempre que o videoUrl é atualizado
+        // A dependência é apenas videoUrl
+    }, [videoUrl]) 
 
     if (loading) {
         return <div className="player-loading">Carregando player...</div>
@@ -195,15 +227,21 @@ const EpisodePlayer = () => {
             {error && <div className="player-error">{error}</div>}
 
             <div className="player-wrapper" style={{ display: error ? 'none' : 'block' }}>
-                <video 
-                    ref={videoRef}
-                    className="video-player" 
-                    controls
-                    autoPlay 
-                    width="100%" 
-                    height="100%"
-                    playsInline
-                ></video>
+                {/* [CORREÇÃO DE RENDERIZAÇÃO] Só renderiza a tag <video> se houver URL */}
+                {videoUrl ? (
+                    <video 
+                        ref={videoRef}
+                        className="video-player" 
+                        controls
+                        autoPlay 
+                        width="100%" 
+                        height="100%"
+                        playsInline
+                    ></video>
+                ) : (
+                    // Mensagem de erro mais clara se a URL não for encontrada no Firestore
+                    !error && <div className="player-error">Não foi possível encontrar a URL do vídeo. Verifique se o documento `{animeId}_s01e{episodeId.padStart(2, '0')}` existe no Firestore.</div>
+                )}
             </div>
 
             {/* Renderiza o seletor de episódios com base na lista buscada */}
