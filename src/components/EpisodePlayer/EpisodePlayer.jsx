@@ -1,23 +1,16 @@
-// src/components/EpisodePlayer/EpisodePlayer.jsx
-
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom' 
 import Hls from 'hls.js' 
 import { 
     doc, 
     getDoc, 
-    setDoc, 
     collection, 
     query, 
     where, 
     getDocs 
 } from 'firebase/firestore' 
-// Importa 'auth' e 'onAuthStateChanged'
-import { onAuthStateChanged } from 'firebase/auth' 
-import { db, auth } from '../../firebase/config' // <--- ADICIONADO: Importa 'auth'
+import { db } from '../../firebase/config' 
 import './EpisodePlayer.css'
-
-const PROGRESS_SAVE_INTERVAL_MS = 10000; // Salvar progresso a cada 10 segundos 
 
 // [COMPONENTE] Seletor de Episódios (Mantido)
 const EpisodeSelector = ({ animeId, episodesList, currentEpisodeId }) => {
@@ -63,100 +56,15 @@ const EpisodePlayer = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [episodesList, setEpisodesList] = useState([]) 
-    const [initialTime, setInitialTime] = useState(0)
-    const progressUpdateTimer = useRef(null)
-    
-    // [NOVO] Estados para autenticação
-    const [userId, setUserId] = useState(null); 
-    const [authResolved, setAuthResolved] = useState(false); // Flag para garantir que a autenticação terminou
 
-
-    // [FUNÇÃO] Constrói o ID único para salvar o progresso do usuário no Firestore.
-    const getProgressDocId = () => `${userId}_${animeId}_${episodeId}`;
-    
-    // [FUNÇÃO] Salva o progresso do vídeo no Firestore.
-    const savePlaybackProgress = async (currentTime, isFinished = false) => {
-        if (!userId) return; // Não salva se não houver um ID de usuário (nem anônimo)
-
-        if (isFinished) {
-            const progressData = {
-                animeId: animeId,
-                episodeId: episodeId,
-                timestamp: Date.now(),
-                currentTime: 0, 
-                finished: true // Marca como finalizado
-            };
-            try {
-                await setDoc(doc(db, 'userProgress', getProgressDocId()), progressData);
-                console.log(`Progresso finalizado para ${getProgressDocId()} salvo.`);
-            } catch (e) {
-                console.error("Erro ao salvar progresso finalizado:", e);
-            }
-            return;
-        }
-
-        if (!videoRef.current) return;
-        const progressData = {
-            animeId: animeId,
-            episodeId: episodeId,
-            timestamp: Date.now(),
-            currentTime: Math.floor(currentTime),
-            finished: false
-        };
-
-        try {
-            await setDoc(doc(db, 'userProgress', getProgressDocId()), progressData);
-        } catch (e) {
-            console.error("Erro ao salvar progresso:", e);
-        }
-    };
-    
-    // [FUNÇÃO] Busca o progresso salvo no Firestore.
-    const getPlaybackProgress = async () => {
-        if (!userId) return 0; // Não busca se não houver um ID de usuário
-        
-        try {
-            const docRef = doc(db, 'userProgress', getProgressDocId()); 
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                const savedTime = data.currentTime || 0;
-                
-                // Retorna o tempo salvo apenas se não estiver marcado como finalizado
-                return data.finished ? 0 : savedTime;
-            } else {
-                return 0;
-            }
-        } catch (e) {
-            console.error("Erro ao buscar progresso:", e);
-            return 0;
-        }
-    };
-    
-    // [NOVO EFEITO] Efeito para resolver o estado de autenticação.
+    // EFEITO 1: Busca os dados do episódio no Firestore 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            // Se houver um usuário logado, use o uid, senão, use 'anon' para navegação deslogada
-            setUserId(user ? user.uid : 'anon_user'); 
-            setAuthResolved(true); // Marca que o estado de autenticação inicial foi resolvido
-        });
-        // Retorna a função de cleanup
-        return () => unsubscribe();
-    }, []); 
-
-
-    // EFEITO 1: Busca os dados do episódio E o progresso do usuário (Só executa após autenticação resolvida)
-    useEffect(() => {
-        // Só executa se a autenticação foi resolvida
-        if (!authResolved) return; 
-
-        const fetchEpisodeAndProgress = async () => {
+        const fetchEpisodeData = async () => {
             try {
                 setLoading(true)
                 setError(null)
                 
-                // --- 1. BUSCA DA LISTA DE EPISÓDIOS ---
+                // --- 1. BUSCA DA LISTA DE EPISÓDIOS (com correção para frieren) ---
                 let fetchedEpisodes = [];
                 if (animeId === 'frieren') {
                      fetchedEpisodes = [
@@ -185,20 +93,18 @@ const EpisodePlayer = () => {
                 
                 setEpisodesList(fetchedEpisodes);
 
-                // --- 2. BUSCA DO EPISÓDIO ATUAL ---
+                // --- 2. BUSCA DO EPISÓDIO ATUAL (O fetch principal) ---
                 const paddedEpisodeId = episodeId.padStart(2, '0');
                 const currentDocumentId = `${animeId}_s01e${paddedEpisodeId}`; 
 
                 const episodeDocRef = doc(db, 'episodes', currentDocumentId)
                 const episodeDoc = await getDoc(episodeDocRef)
-                
-                let fetchedVideoUrl = null;
-                let finalTitle = `Episódio ${episodeId}`;
 
                 if (episodeDoc.exists()) {
                     const data = episodeDoc.data()
-                    fetchedVideoUrl = data.hlsUrl;
-                    finalTitle = data.title || fetchedEpisodes.find(ep => ep.episodeId === episodeId)?.title || finalTitle;
+                    setVideoUrl(data.hlsUrl) 
+                    const finalTitle = data.title || fetchedEpisodes.find(ep => ep.episodeId === episodeId)?.title || `Episódio ${episodeId}`;
+                    setEpisodeTitle(finalTitle)
 
                 } else {
                     if (fetchedEpisodes.length === 0) {
@@ -206,158 +112,111 @@ const EpisodePlayer = () => {
                     } else {
                         setError(`Episódio não encontrado. ID esperado no Firestore: ${currentDocumentId}`)
                     }
-                    fetchedVideoUrl = null; 
+                    setVideoUrl(null); 
                 }
-
-                setVideoUrl(fetchedVideoUrl)
-                setEpisodeTitle(finalTitle)
-
-                // --- 3. BUSCA DO PROGRESSO DO USUÁRIO ---
-                if (fetchedVideoUrl) {
-                    const savedTime = await getPlaybackProgress();
-                    setInitialTime(savedTime);
-                }
-
-
             } catch (err) {
                 console.error("Erro ao buscar dados do episódio ou lista:", err)
                 setError('Erro ao conectar ou buscar dados do serviço de metadados.')
-                setVideoUrl(null); 
             } finally {
                 setLoading(false)
             }
         }
         
-        fetchEpisodeAndProgress()
+        fetchEpisodeData()
         
-        // Limpeza: Garante que o timer de salvamento pare ao desmontar o componente
+        // Limpeza de estado na desmontagem
         return () => {
-            if (progressUpdateTimer.current) {
-                clearInterval(progressUpdateTimer.current);
-            }
+            setVideoUrl(null); 
+            setEpisodeTitle('Carregando...');
+            setLoading(true);
+            setError(null);
         };
+    }, [animeId, episodeId]) 
 
-    }, [animeId, episodeId, authResolved]) // Depende de 'authResolved'
-
-
-    // EFEITO 2: Lógica para inicializar/re-inicializar o HLS.js e aplicar o progresso
+    // EFEITO 2: Lógica para inicializar/re-inicializar o HLS.js (CORRIGIDO PARA ESTABILIDADE)
     useEffect(() => {
         const video = videoRef.current;
         const source = videoUrl;
         
-        // Limpa qualquer timer ou HLS anterior
+        // Destrói qualquer instância HLS anterior, garantindo que o vídeo anterior pare de carregar
         if (hlsRef.current) {
             hlsRef.current.destroy();
             hlsRef.current = null;
         }
-        if (progressUpdateTimer.current) {
-            clearInterval(progressUpdateTimer.current);
-            progressUpdateTimer.current = null;
-        }
 
-        // Se não houver URL, limpa e sai
-        if (!source || !video || !authResolved) {
+        // Se não houver URL ou elemento de vídeo, limpa e sai
+        if (!source || !video) {
             if (video) {
                 video.src = ""; 
                 video.load(); 
             }
             return;
         }
-        
-        // Função para iniciar o play e buscar para o tempo inicial
+
+        // Função de reprodução que garante que o player está pronto
         const startPlayback = () => {
-            // Se houver tempo inicial, busca para ele
-            if (initialTime > 0) {
-                console.log(`Pulando para o tempo salvo: ${initialTime}s`);
-                video.currentTime = initialTime;
-            }
-            
             video.play().catch(e => console.error("Erro ao tentar autoPlay:", e));
-
-            // Inicia o timer para salvar o progresso periodicamente
-            progressUpdateTimer.current = setInterval(() => {
-                if (!video.paused && !video.ended) {
-                    savePlaybackProgress(video.currentTime);
-                }
-            }, PROGRESS_SAVE_INTERVAL_MS);
         }
-
+        
         // Suporte nativo (Safari e outros)
         if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            video.src = source;
-            video.load(); 
+            // Limpa o source do vídeo antes de carregar o novo.
+            if (video.src !== source) {
+                video.src = source;
+                video.load(); 
+            }
             
-            video.onloadedmetadata = () => {
+            // FIX: Espera o metadado carregar antes de dar play (para vídeo/tempo aparecer)
+            const handleMetadataLoaded = () => {
                 startPlayback();
-                video.onloadedmetadata = null;
-            };
+                video.removeEventListener('loadedmetadata', handleMetadataLoaded);
+            }
             
-            // Lógica de limpeza para o modo nativo
+            video.addEventListener('loadedmetadata', handleMetadataLoaded);
+            
+            // Retorna a função de limpeza 
             return () => {
+                video.removeEventListener('loadedmetadata', handleMetadataLoaded);
                 video.src = "";
                 video.load();
-                if (progressUpdateTimer.current) {
-                    clearInterval(progressUpdateTimer.current);
-                }
             };
         }
         
         // HLS.js para navegadores sem suporte nativo
-        if (Hls.isSupported()) {
+        else if (Hls.isSupported()) {
             const hls = new Hls();
-            hlsRef.current = hls;
+            hlsRef.current = hls; // Armazena a nova instância na ref
             hls.attachMedia(video);
             
             hls.on(Hls.Events.MEDIA_ATTACHED, function () {
                 hls.loadSource(source);
             });
             
-            hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                 startPlayback();
-            });
+            // FIX: Usar o evento nativo 'loadedmetadata' para sincronizar o início do play 
+            // após o HLS.js analisar o manifesto e carregar os metadados.
+            const handleHlsMetadataLoaded = () => {
+                startPlayback();
+                video.removeEventListener('loadedmetadata', handleHlsMetadataLoaded);
+            };
 
-            // Função de limpeza: Destruir a instância HLS e o timer
+            video.addEventListener('loadedmetadata', handleHlsMetadataLoaded);
+            
+            // Função de limpeza: Destruir a instância HLS e remover o listener
             return () => {
+                video.removeEventListener('loadedmetadata', handleHlsMetadataLoaded);
                 if (hlsRef.current) {
                     hlsRef.current.destroy();
                     hlsRef.current = null;
                 }
-                if (progressUpdateTimer.current) {
-                    clearInterval(progressUpdateTimer.current);
-                }
             };
         } else {
             console.error("HLS não é suportado por este navegador.");
+            setError("O formato HLS não é suportado por este navegador.")
         }
-        
-    }, [videoUrl, initialTime, authResolved]) // Depende de authResolved para garantir que a lógica de startPlayback use o initialTime correto.
+        // A dependência é apenas videoUrl
+    }, [videoUrl]) 
 
-    // EFEITO 3: Adiciona o listener para salvar o progresso ao finalizar
-    useEffect(() => {
-        const video = videoRef.current;
-        if (!video || !videoUrl || !userId) return;
-
-        const handleVideoEnded = () => {
-            // Salva com o flag de finalizado (currentTime = 0)
-            savePlaybackProgress(0, true);
-            
-            // Para o timer de atualização se houver
-            if (progressUpdateTimer.current) {
-                clearInterval(progressUpdateTimer.current);
-                progressUpdateTimer.current = null;
-            }
-        };
-
-        video.addEventListener('ended', handleVideoEnded);
-
-        return () => {
-            video.removeEventListener('ended', handleVideoEnded);
-        };
-    }, [animeId, episodeId, videoUrl, userId]) // Depende de userId para garantir que a função de salvamento seja correta.
-
-
-    // Adiciona uma condição de carregamento inicial extra para autenticação
-    if (!authResolved || loading) {
+    if (loading) {
         return <div className="player-loading">Carregando player...</div>
     }
 
@@ -368,30 +227,22 @@ const EpisodePlayer = () => {
             {error && <div className="player-error">{error}</div>}
 
             <div className="player-wrapper" style={{ display: error ? 'none' : 'block' }}>
-                <video 
-                    ref={videoRef}
-                    className="video-player" 
-                    controls
-                    autoPlay 
-                    width="100%" 
-                    height="100%"
-                    playsInline
-                ></video>
+                {/* [CORREÇÃO DE RENDERIZAÇÃO] Só renderiza a tag <video> se houver URL */}
+                {videoUrl ? (
+                    <video 
+                        ref={videoRef}
+                        className="video-player" 
+                        controls
+                        autoPlay 
+                        width="100%" 
+                        height="100%"
+                        playsInline
+                    ></video>
+                ) : (
+                    // Mensagem de erro mais clara se a URL não for encontrada no Firestore
+                    !error && <div className="player-error">Não foi possível encontrar a URL do vídeo. Verifique se o documento `{animeId}_s01e{episodeId.padStart(2, '0')}` existe no Firestore.</div>
+                )}
             </div>
-            
-            {/* Nota sobre o progresso salvo para UX */}
-            {initialTime > 0 && !error && (
-                <div className="playback-note">
-                    Retomando em {Math.floor(initialTime / 60)}m {initialTime % 60}s. Seu progresso é salvo automaticamente.
-                </div>
-            )}
-            
-            {/* Aviso se o usuário não estiver logado e o progresso não for salvo */}
-            {userId === 'anon_user' && !error && (
-                <div className="playback-note" style={{ color: 'yellow', marginTop: '0.5rem' }}>
-                    ⚠️ Progresso não será salvo no Firestore para usuários deslogados. Faça login para salvar!
-                </div>
-            )}
 
             {/* Renderiza o seletor de episódios com base na lista buscada */}
             {episodesList.length > 0 && (
