@@ -66,9 +66,19 @@ body {
   position: relative;
 }
 
-/* Coluna da imagem (ESQUERDA no Cadastro) */
-.cadastro-image-column {
+/* Coluna do formulário (ESQUERDA no Cadastro) */
+.cadastro-form-column {
   order: 1;
+  background: var(--space-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+/* Coluna da imagem (DIREITA no Cadastro) */
+.cadastro-image-column {
+  order: 2;
   position: relative;
   background: linear-gradient(135deg, #1a1a40, #302b63);
   overflow: hidden;
@@ -77,7 +87,7 @@ body {
   justify-content: center;
 }
 
-/* Imagem específica do Maid Dragon para Cadastro - MODIFICADA */
+/* Imagem específica do Maid Dragon para Cadastro */
 .cadastro-image-column::before {
   content: '';
   position: absolute;
@@ -93,9 +103,20 @@ body {
   filter: brightness(1.1) contrast(1.05) saturate(1.1);
 }
 
-/* Coluna do formulário (DIREITA no Cadastro) */
-.cadastro-form-column {
-  order: 2;
+.cadastro-image-column::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(138, 43, 226, 0.2) 0%,
+    rgba(255, 0, 255, 0.1) 50%,
+    rgba(0, 255, 255, 0.15) 100%
+  );
+  pointer-events: none;
 }
 
 /* Cartão de vidro (Glassmorphism) */
@@ -105,11 +126,9 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
   border-radius: 20px;
-  padding: 40px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  padding: 50px 40px;
+  width: 100%;
+  max-width: 450px;
   position: relative;
   overflow: hidden;
 }
@@ -162,16 +181,18 @@ body {
 
 /* Mensagem de erro */
 .cadastro-error-message {
-  color: var(--error-color);
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 0.9rem;
-  padding: 12px;
   background: rgba(255, 107, 107, 0.1);
-  border-radius: 8px;
   border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  color: var(--error-color);
+  font-size: 0.9rem;
+  text-align: center;
   backdrop-filter: blur(10px);
-  animation: cadastro-fadeIn 0.3s ease;
+  position: relative;
+  z-index: 2;
+  animation: cadastro-fadeIn 0.3s ease-out;
 }
 
 @keyframes cadastro-fadeIn {
@@ -204,7 +225,6 @@ body {
 
 .cadastro-input-field::placeholder {
   color: var(--text-secondary);
-  transition: color 0.3s ease;
 }
 
 .cadastro-input-field:focus {
@@ -216,6 +236,11 @@ body {
 
 .cadastro-input-field:focus::placeholder {
   color: transparent;
+}
+
+.cadastro-input-field:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .cadastro-input-glow {
@@ -252,9 +277,10 @@ body {
   overflow: hidden;
   margin-top: 8px;
   isolation: isolate;
+  font-family: inherit;
 }
 
-.cadastro-submit-button:hover:not(.loading) {
+.cadastro-submit-button:hover:not(.loading):not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 
     0 10px 25px rgba(138, 43, 226, 0.4),
@@ -271,6 +297,31 @@ body {
   transform: none;
 }
 
+.cadastro-submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cadastro-button-text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.cadastro-submit-button.loading .cadastro-button-text::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: cadastro-spin 1s linear infinite;
+}
+
 .cadastro-button-glow {
   position: absolute;
   top: 0;
@@ -285,43 +336,16 @@ body {
   z-index: -1;
 }
 
-.cadastro-submit-button:hover:not(.loading) .cadastro-button-glow {
+.cadastro-submit-button:hover:not(.loading):not(:disabled) .cadastro-button-glow {
   left: 100%;
-}
-
-.cadastro-button-text {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-/* Loading animation */
-.cadastro-submit-button.loading .cadastro-button-text::after {
-  content: '';
-  width: 16px;
-  height: 16px;
-  border: 2px solid transparent;
-  border-top: 2px solid white;
-  border-radius: 50%;
-  animation: cadastro-spin 1s linear infinite;
-}
-
-@keyframes cadastro-spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
 }
 
 /* Links de autenticação */
 .cadastro-links {
   text-align: center;
   margin-top: 24px;
+  position: relative;
+  z-index: 2;
 }
 
 .cadastro-toggle-mode {
@@ -338,6 +362,7 @@ body {
   border-radius: 8px;
   position: relative;
   overflow: hidden;
+  font-family: inherit;
 }
 
 .cadastro-toggle-mode::before {
@@ -371,6 +396,8 @@ body {
   font-size: 0.8rem;
   opacity: 0.7;
   font-family: 'MS Gothic', 'Yu Gothic', monospace;
+  position: relative;
+  z-index: 2;
 }
 
 /* Elementos flutuantes futuristas */
@@ -381,6 +408,7 @@ body {
   right: 0;
   bottom: 0;
   z-index: 2;
+  pointer-events: none;
 }
 
 .cadastro-floating-element {
@@ -432,6 +460,15 @@ body {
   }
 }
 
+@keyframes cadastro-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 /* Responsividade do Cadastro */
 @media (max-width: 968px) {
   .cadastro-content {
@@ -445,7 +482,7 @@ body {
   }
 
   .cadastro-glass-card {
-    padding: 30px 25px;
+    padding: 40px 30px;
   }
 
   .cadastro-title {
@@ -463,7 +500,7 @@ body {
   }
 
   .cadastro-glass-card {
-    padding: 25px 20px;
+    padding: 30px 20px;
     border-radius: 16px;
   }
 
@@ -483,7 +520,7 @@ body {
 
   .cadastro-error-message {
     font-size: 0.8rem;
-    padding: 10px;
+    padding: 12px;
   }
 }
 
@@ -491,11 +528,12 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .cadastro-floating-element,
   .cadastro-button-glow,
-  .cadastro-toggle-mode::before {
+  .cadastro-toggle-mode::before,
+  .cadastro-error-message {
     animation: none;
   }
   
-  .cadastro-submit-button:hover:not(.loading) {
+  .cadastro-submit-button:hover:not(.loading):not(:disabled) {
     transform: none;
   }
   
@@ -510,4 +548,25 @@ body {
 .cadastro-toggle-mode:focus-visible {
   outline: 2px solid var(--electric-blue);
   outline-offset: 2px;
+}
+
+/* Estados de loading para inputs */
+.cadastro-input-field:disabled {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+}
+
+/* Efeito de pulso para elementos em loading */
+@keyframes cadastro-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.cadastro-submit-button.loading {
+  animation: cadastro-pulse 2s ease-in-out infinite;
 }

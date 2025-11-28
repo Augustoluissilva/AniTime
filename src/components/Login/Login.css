@@ -1,4 +1,4 @@
-/* Variáveis de cores e estilos para Login */
+/* Variáveis de cores e estilos */
 :root {
   --deep-space: #0f0c29;
   --space-purple: #1a1a40;
@@ -9,6 +9,8 @@
   --glass-border: rgba(255, 255, 255, 0.1);
   --text-primary: #ffffff;
   --text-secondary: #b3b3b3;
+  --error-red: #ff6b6b;
+  --success-green: #51cf66;
 }
 
 /* Reset e estilos base */
@@ -26,7 +28,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Container principal do Login */
+/* Container principal */
 .login-container {
   min-height: 100vh;
   display: flex;
@@ -51,7 +53,7 @@ body {
   pointer-events: none;
 }
 
-/* Layout do conteúdo do Login */
+/* Layout do conteúdo */
 .login-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -61,17 +63,19 @@ body {
   border-radius: 24px;
   overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  position: relative;
 }
 
-/* Coluna do formulário (ESQUERDA no Login) */
+/* Coluna do formulário */
 .login-form-column {
-  order: 1;
+  background: var(--space-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
 }
 
-/* Coluna da imagem (DIREITA no Login) */
+/* Coluna da imagem */
 .login-image-column {
-  order: 2;
   position: relative;
   background: linear-gradient(135deg, #1a1a40, #302b63);
   overflow: hidden;
@@ -80,7 +84,6 @@ body {
   justify-content: center;
 }
 
-/* Imagem de Komi San para Login - MODIFICADA */
 .login-image-column::before {
   content: '';
   position: absolute;
@@ -96,18 +99,32 @@ body {
   filter: brightness(1.1) contrast(1.05) saturate(1.1);
 }
 
-/* Cartão de vidro (Glassmorphism) */
+.login-image-column::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(138, 43, 226, 0.2) 0%,
+    rgba(255, 0, 255, 0.1) 50%,
+    rgba(0, 255, 255, 0.15) 100%
+  );
+  pointer-events: none;
+}
+
+/* Cartão de vidro */
 .login-glass-card {
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
   border-radius: 20px;
-  padding: 40px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  padding: 50px 40px;
+  width: 100%;
+  max-width: 450px;
   position: relative;
   overflow: hidden;
 }
@@ -126,7 +143,7 @@ body {
   pointer-events: none;
 }
 
-/* Cabeçalho do cartão */
+/* Cabeçalho */
 .login-card-header {
   text-align: center;
   margin-bottom: 40px;
@@ -150,6 +167,33 @@ body {
   background: linear-gradient(90deg, var(--neon-purple), var(--neon-pink));
   margin: 0 auto;
   border-radius: 2px;
+}
+
+/* Mensagem de erro */
+.login-error-message {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  color: var(--error-red);
+  font-size: 0.9rem;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 2;
+  animation: login-error-appear 0.3s ease-out;
+}
+
+@keyframes login-error-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Formulário */
@@ -177,7 +221,6 @@ body {
 
 .login-input-field::placeholder {
   color: var(--text-secondary);
-  transition: color 0.3s ease;
 }
 
 .login-input-field:focus {
@@ -189,6 +232,11 @@ body {
 
 .login-input-field:focus::placeholder {
   color: transparent;
+}
+
+.login-input-field:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .login-input-glow {
@@ -209,7 +257,39 @@ body {
   opacity: 0.4;
 }
 
-/* Botão de submit */
+/* Esqueci a senha */
+.login-forgot-password {
+  text-align: right;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.login-forgot-link {
+  background: none;
+  border: none;
+  color: var(--electric-blue);
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: all 0.3s ease;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+.login-forgot-link:hover {
+  color: var(--neon-pink);
+  background: rgba(0, 255, 255, 0.05);
+  text-decoration: none;
+}
+
+.login-forgot-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Botão principal */
 .login-submit-button {
   position: relative;
   width: 100%;
@@ -225,9 +305,10 @@ body {
   overflow: hidden;
   margin-top: 8px;
   isolation: isolate;
+  font-family: inherit;
 }
 
-.login-submit-button:hover:not(.loading) {
+.login-submit-button:hover:not(.loading):not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 
     0 10px 25px rgba(138, 43, 226, 0.4),
@@ -244,6 +325,31 @@ body {
   transform: none;
 }
 
+.login-submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.login-button-text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.login-submit-button.loading .login-button-text::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: login-spin 1s linear infinite;
+}
+
 .login-button-glow {
   position: absolute;
   top: 0;
@@ -258,34 +364,45 @@ body {
   z-index: -1;
 }
 
-.login-submit-button:hover:not(.loading) .login-button-glow {
+.login-submit-button:hover:not(.loading):not(:disabled) .login-button-glow {
   left: 100%;
 }
 
-.login-button-text {
+/* Botão Demo */
+.login-demo-button {
+  width: 100%;
+  padding: 14px;
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid var(--electric-blue);
+  border-radius: 12px;
+  color: var(--electric-blue);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 12px;
+  margin-bottom: 20px;
+  font-family: inherit;
   position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  z-index: 2;
 }
 
-/* Loading animation */
-.login-submit-button.loading .login-button-text::after {
-  content: '';
-  width: 16px;
-  height: 16px;
-  border: 2px solid transparent;
-  border-top: 2px solid white;
-  border-radius: 50%;
-  animation: login-spin 1s linear infinite;
+.login-demo-button:hover:not(:disabled) {
+  background: rgba(0, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(0, 255, 255, 0.2);
 }
 
-/* Links de autenticação */
+.login-demo-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Links */
 .login-links {
   text-align: center;
   margin-top: 24px;
+  position: relative;
+  z-index: 2;
 }
 
 .login-toggle-mode {
@@ -302,6 +419,7 @@ body {
   border-radius: 8px;
   position: relative;
   overflow: hidden;
+  font-family: inherit;
 }
 
 .login-toggle-mode::before {
@@ -335,16 +453,19 @@ body {
   font-size: 0.8rem;
   opacity: 0.7;
   font-family: 'MS Gothic', 'Yu Gothic', monospace;
+  position: relative;
+  z-index: 2;
 }
 
-/* Elementos flutuantes futuristas */
+/* Elementos flutuantes */
 .login-floating-elements {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 2;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .login-floating-element {
@@ -383,7 +504,7 @@ body {
   background: linear-gradient(135deg, var(--electric-blue), transparent 70%);
 }
 
-/* Animações específicas do Login */
+/* Animações */
 @keyframes login-float {
   0%, 100% {
     transform: translateY(0) rotate(0deg) scale(1);
@@ -405,7 +526,23 @@ body {
   }
 }
 
-/* Responsividade do Login */
+/* Estados de sucesso (para feedback visual) */
+.login-success-message {
+  background: rgba(81, 207, 102, 0.1);
+  border: 1px solid rgba(81, 207, 102, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  color: var(--success-green);
+  font-size: 0.9rem;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 2;
+  animation: login-error-appear 0.3s ease-out;
+}
+
+/* Responsividade */
 @media (max-width: 968px) {
   .login-content {
     grid-template-columns: 1fr;
@@ -417,16 +554,16 @@ body {
     display: none;
   }
 
-  .login-glass-card {
+  .login-form-column {
     padding: 30px 25px;
+  }
+
+  .login-glass-card {
+    padding: 40px 30px;
   }
 
   .login-title {
     font-size: 2rem;
-  }
-
-  .login-form-column {
-    order: 1;
   }
 }
 
@@ -435,8 +572,12 @@ body {
     padding: 10px;
   }
 
+  .login-form-column {
+    padding: 20px 15px;
+  }
+
   .login-glass-card {
-    padding: 25px 20px;
+    padding: 30px 20px;
     border-radius: 16px;
   }
 
@@ -453,17 +594,25 @@ body {
     padding: 14px;
     font-size: 1rem;
   }
+
+  .login-demo-button {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
 }
 
 /* Melhorias de acessibilidade */
 @media (prefers-reduced-motion: reduce) {
   .login-floating-element,
   .login-button-glow,
-  .login-toggle-mode::before {
+  .login-toggle-mode::before,
+  .login-error-message,
+  .login-success-message {
     animation: none;
   }
   
-  .login-submit-button:hover:not(.loading) {
+  .login-submit-button:hover:not(.loading):not(:disabled),
+  .login-demo-button:hover:not(:disabled) {
     transform: none;
   }
   
@@ -475,7 +624,30 @@ body {
 /* Focus visível para acessibilidade */
 .login-input-field:focus-visible,
 .login-submit-button:focus-visible,
-.login-toggle-mode:focus-visible {
+.login-toggle-mode:focus-visible,
+.login-forgot-link:focus-visible,
+.login-demo-button:focus-visible {
   outline: 2px solid var(--electric-blue);
   outline-offset: 2px;
+}
+
+/* Estados de loading para inputs */
+.login-input-field:disabled {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+}
+
+/* Efeito de pulso para elementos em loading */
+@keyframes login-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.login-submit-button.loading {
+  animation: login-pulse 2s ease-in-out infinite;
 }
