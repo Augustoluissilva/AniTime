@@ -1,22 +1,24 @@
-// src/App.jsx
-
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/Header/Header'
-// --- NOVAS IMPORTAÇÕES PARA O LAYOUT E HOMEPAGE ---
 import Footer from './components/Footer/Footer'
 import WelcomeSection from './components/WelcomeSection/WelcomeSection'
 import BenefitsSection from './components/BenefitsSection/BenefitsSection'
 import AnimeCarousel from './components/AnimeCarousel/AnimeCarousel'
-// --------------------------------------------------
+
 import Cadastro from './components/Cadastro/Cadastro'
 import Login from './components/Login/Login'
 import EpisodePlayer from './components/EpisodePlayer/EpisodePlayer'
-// --- NOVA IMPORTAÇÃO: Profile ---
 import Profile from './components/Profile/Profile'
+
+// --- CORREÇÃO AQUI ---
+// Assumindo que você colocou a pasta Home dentro de components junto com as outras:
+import Home from './components/Home/Home' 
+// OBS: Se a pasta Home estiver solta na raiz 'src', mude para './Home/Home'
+
 import './App.css'
 
-// [DEFINIÇÃO] Componente de Layout que envolve a página com Header e Footer.
+// [DEFINIÇÃO] Layout padrão (com Header e Footer genéricos)
 const Layout = ({ children }) => (
   <>
     <Header />
@@ -25,8 +27,8 @@ const Layout = ({ children }) => (
   </>
 )
 
-// [DEFINIÇÃO] Componente da Página Inicial, agrupando as seções.
-const HomePage = () => (
+// [DEFINIÇÃO] Página Inicial (Landing Page para quem não está logado)
+const LandingPage = () => (
   <>
     <WelcomeSection />
     <AnimeCarousel />
@@ -34,32 +36,20 @@ const HomePage = () => (
   </>
 )
 
-// [DEFINIÇÃO] Componente da Página Play (Exemplo, usando o carrossel).
-const PlayPage = () => (
-  <div style={{ minHeight: '80vh', padding: '4rem 2rem', background: 'var(--purple-bg)' }}>
-    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      <h1 style={{ color: 'var(--neon-purple)', textAlign: 'center', marginBottom: '3rem' }}>
-        Mais Animes!
-      </h1>
-      <AnimeCarousel />
-    </div>
-  </div>
-)
-
 function App() {
-  // A cor roxa (var(--neon-purple)) e var(--purple-bg) são do App.css
   return (
     <Router>
       <div className="App">
         <Routes>
-          {/* Agora, Layout e HomePage estão definidos */}
-          <Route path="/" element={<Layout><HomePage /></Layout>} />
-          <Route path="/play" element={<Layout><PlayPage /></Layout>} />
+          {/* Rota Raiz (Landing Page pública) */}
+          <Route path="/" element={<Layout><LandingPage /></Layout>} />
+
+          {/* Rota Home (Dashboard Pós-Login) - Sem Layout genérico */}
+          <Route path="/home" element={<Home />} />
+
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/login" element={<Login />} />
-          {/* ROTA DO PERFIL (NOVA) */}
           <Route path="/perfil" element={<Layout><Profile /></Layout>} />
-          {/* Rota para assistir: /watch/spy-family/1 */}
           <Route path="/watch/:animeId/:episodeId" element={<EpisodePlayer />} />
         </Routes>
       </div>

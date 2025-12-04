@@ -1,0 +1,240 @@
+:root {
+  --bg-main: #0D0015;     
+  --bg-nav: #120022;      
+  --purple-primary: #9654FF; 
+  --purple-strip: #6A3E99;   
+  --purple-banner: #542E93;  
+  --text-white: #FFFFFF;
+  --progress-red: #E50914;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-white);
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.main-content {
+  margin-top: 80px; 
+  padding-bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.section-container { 
+  position: relative; 
+  width: 100%; 
+  margin-bottom: 30px; 
+}
+
+/* TÍTULO DAS SEÇÕES - BRANCO */
+.section-title { 
+    padding: 0 5%; 
+    margin-bottom: 15px; 
+    font-size: 18px; 
+    font-weight: 600; 
+    color: #FFFFFF !important; /* Força o branco */
+    position: relative;
+    z-index: 2;
+    text-shadow: none; /* Remove sombras se houver */
+}
+
+.carousel {
+  display: flex; 
+  gap: 20px; 
+  overflow-x: auto; 
+  padding: 10px 5%;
+  scrollbar-width: none; 
+  align-items: center; 
+  position: relative;
+  z-index: 2;
+}
+.carousel::-webkit-scrollbar { display: none; }
+
+/* --- ESTILOS SUGESTÕES (Ajustado para Protótipo) --- */
+.section-sugestoes {
+    position: relative;
+    padding-bottom: 10px;
+    background-color: transparent; /* Fundo preto (do body) na área do título */
+}
+
+.suggestions-strip {
+    position: absolute;
+    /* COMEÇA LOGO ABAIXO DO TÍTULO */
+    top: 40px; 
+    left: 0;
+    width: 100%;
+    /* ALTURA REDUZIDA: Para passar pelo meio dos cards */
+    height: 100px; 
+    background-color: var(--purple-strip);
+    z-index: 0;
+    opacity: 0.9;
+}
+
+.suggestion-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000; /* Fundo preto preenche o espaço se a imagem for estreita */
+    overflow: hidden;
+    border: 2px solid #444;
+    transition: all 0.3s ease;
+    min-width: 260px;
+    height: 150px;
+    border-radius: 10px;
+    /* Move o card um pouco para baixo para centralizar na faixa */
+    margin-top: 10px; 
+}
+
+/* IMAGEM 100% VISÍVEL (CONTAIN) */
+.suggestion-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Isso impede que a imagem seja cortada */
+    transition: transform 0.4s ease;
+}
+
+/* Hover Sugestões */
+.suggestion-card:hover {
+    border-color: var(--purple-primary);
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    z-index: 3;
+}
+.suggestion-card:hover img { transform: scale(1.05); }
+
+.card-play-icon { 
+    position: absolute; 
+    bottom: 8px; 
+    left: 8px; 
+    background: rgba(0,0,0,0.7); 
+    border-radius: 50%; 
+    padding: 4px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+
+
+/* --- ESTILOS TOP MAIS ASSISTIDOS --- */
+.top-banner-container { 
+    background-color: var(--purple-banner); 
+    width: 100%; 
+    height: 60px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 0 5%; 
+    margin-bottom: 20px; 
+    position: relative; 
+}
+
+.top-label-wrapper { 
+    background-color: #7B42BC; 
+    height: 80px; 
+    display: flex; 
+    align-items: center; 
+    padding-left: 5%; 
+    padding-right: 40px; 
+    margin-left: -5%; 
+    clip-path: polygon(0 0, 80% 0, 100% 50%, 80% 100%, 0 100%); 
+    position: relative; 
+    z-index: 2; 
+}
+
+.top-label-text { 
+    color: white; 
+    font-weight: bold; 
+    line-height: 1.2; 
+    font-size: 16px; 
+}
+
+.search-container { 
+    background: white; 
+    border-radius: 20px; 
+    padding: 5px 15px; 
+    display: flex; 
+    align-items: center; 
+    width: 220px; 
+}
+
+.search-input { 
+    border: none; 
+    outline: none; 
+    width: 100%; 
+    font-size: 14px; 
+    color: #333; 
+}
+
+.top-grid { 
+    display: grid; 
+    grid-template-columns: repeat(5, 1fr); 
+    gap: 15px; 
+    padding: 0 5%; 
+}
+
+.top-card { 
+    aspect-ratio: 2/3; 
+    background: #222; 
+    border-radius: 8px; 
+    overflow: hidden; 
+    cursor: pointer; 
+    transition: transform 0.2s; 
+}
+
+.top-card:hover { transform: translateY(-5px); }
+.top-card img { width: 100%; height: 100%; object-fit: cover; }
+
+
+/* --- ESTILOS CONTINUAR ASSISTINDO --- */
+.section-continue { padding-bottom: 40px; }
+
+.continue-card { 
+    min-width: 240px; 
+    height: 140px; 
+    background: #111; 
+    border-radius: 8px; 
+    overflow: hidden; 
+    position: relative; 
+    border: 1px solid #333; 
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.continue-card img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    opacity: 0.8; 
+    transition: transform 0.4s ease; 
+}
+
+.progress-track { 
+    position: absolute; 
+    bottom: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 4px; 
+    background: rgba(255,255,255,0.2); 
+}
+
+.progress-fill { 
+    height: 100%; 
+    background-color: var(--progress-red); 
+}
+
+/* Hover Continuar Assistindo */
+.continue-card:hover {
+    border-color: var(--purple-primary);
+    transform: translateY(-5px);
+    box-shadow: 0 0 15px rgba(150, 84, 255, 0.4);
+    z-index: 3;
+}
+.continue-card:hover img { transform: scale(1.05); }
+
+@media (max-width: 768px) {
+    .top-grid { grid-template-columns: repeat(3, 1fr); }
+    .search-container { width: 140px; }
+}

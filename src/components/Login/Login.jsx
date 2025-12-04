@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../../firebase/config'
+import { auth } from '../../firebase/config';
 import './Login.css';
 
 const Login = () => {
@@ -38,8 +38,9 @@ const Login = () => {
       const user = userCredential.user;
       console.log('Usuário logado:', user);
       
-      // Redirecionar para a página principal
-      navigate('/'); // ajuste para sua rota principal
+      // --- ALTERAÇÃO PRINCIPAL AQUI ---
+      // Redireciona para a rota '/home' (o dashboard roxo), e não para '/' (landing page)
+      navigate('/home'); 
 
     } catch (error) {
       console.error('Erro no login:', error);
@@ -91,14 +92,6 @@ const Login = () => {
     });
     // Limpar erro quando o usuário começar a digitar
     if (error) setError('');
-  };
-
-  // Demo login para teste (remova em produção)
-  const handleDemoLogin = () => {
-    setFormData({
-      email: 'demo@exemplo.com',
-      password: 'demo123'
-    });
   };
 
   return (
@@ -171,18 +164,6 @@ const Login = () => {
                 <div className="login-button-glow"></div>
               </button>
 
-              {/* Botão Demo (apenas para desenvolvimento) */}
-              <button 
-                type="button" 
-                className="login-demo-button"
-                onClick={handleDemoLogin}
-                disabled={isLoading}
-              >
-                <span className="login-button-text">
-                  Preencher Dados Demo
-                </span>
-              </button>
-
               <div className="login-links">
                 <Link to="/cadastro" className="login-toggle-mode">
                   Não tem uma conta? Cadastre-se
@@ -205,7 +186,7 @@ const Login = () => {
 
         {/* Coluna da Imagem */}
         <div className="login-image-column">
-          {/* Apenas a imagem da Komi-san */}
+          {/* Apenas a imagem da Komi-san configurada no CSS */}
         </div>
       </div>
     </div>
