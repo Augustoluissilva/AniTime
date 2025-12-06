@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Play } from 'lucide-react';
 
 /* --- IMPORTS DE COMPONENTES --- */
@@ -16,24 +17,31 @@ import myHero from '../../assets/My_Hero.png';
 import Mashle from '../../assets/Mashle.jpg';
 import Demon_Slayer from '../../assets/Demon_Slayer.webp';
 
-// Sugestões (Nomes exatos conforme solicitado)
+// Sugestões
 import Mob_Psycho from '../../assets/Mob_Psycho.webp';
 import Charlotte from '../../assets/Charlotte2.png';
 import Assassination_Classroom from '../../assets/Assassination_Classroom.jpg';
 import One_Piece from '../../assets/one_piece.png'; 
 
-// Top Mais Assistidos (Nomes exatos conforme solicitado)
+// Top Mais Assistidos
 import Apothecary_Diaries from '../../assets/the_apothecary_diaries.jpg';
 import Hanako_Kun from '../../assets/Hanako_Kun.jpg';
 import Totoro from '../../assets/Totoro.jpg';
 import Attack_on_Titan from '../../assets/Attack_on_Titan.jpg';
 
-// Continuar Assistindo (Nomes exatos conforme solicitado)
+// Continuar Assistindo
 import Gachiakuta from '../../assets/Gachiakuta.jpg';
 import Fullmetal_Alchemist from '../../assets/fullmetal_Alchemist.jpg';
 import Bleach from '../../assets/Bleach.jpg';
 
 const Home = () => {
+  const navigate = useNavigate();
+
+  // Função de redirecionamento para a tela Play
+  const handlePlayClick = () => {
+    // Redireciona para a rota genérica '/play' configurada no App.jsx
+    navigate('/play'); 
+  };
   
   // 1. Carrossel Principal (Hero)
   const heroAnimes = [
@@ -88,7 +96,11 @@ const Home = () => {
           
           <div className="carousel">
             {suggestions.map((anime) => (
-              <div key={anime.id} className="suggestion-card">
+              <div 
+                key={anime.id} 
+                className="suggestion-card"
+                onClick={handlePlayClick}
+              >
                 <img src={anime.image} alt={anime.title} />
                 <div className="card-play-icon">
                     <Play size={14} fill="white" color="white" />
@@ -115,7 +127,11 @@ const Home = () => {
 
            <div className="top-grid">
               {topAnimes.map((anime) => (
-                  <div key={anime.id} className="top-card">
+                  <div 
+                    key={anime.id} 
+                    className="top-card"
+                    onClick={handlePlayClick}
+                  >
                       <img src={anime.image} alt={anime.title} />
                   </div>
               ))}
@@ -127,7 +143,11 @@ const Home = () => {
             <h3 className="section-title">Continuar assistindo:</h3>
             <div className="carousel">
                 {continueWatching.map((anime) => (
-                    <div key={anime.id} className="continue-card">
+                    <div 
+                        key={anime.id} 
+                        className="continue-card"
+                        onClick={handlePlayClick}
+                    >
                         <img src={anime.image} alt={anime.title} />
                         <div className="card-play-icon">
                             <Play size={14} fill="white" color="white" />

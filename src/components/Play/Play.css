@@ -1,0 +1,236 @@
+:root {
+  --bg-dark: #0D0015;
+  --purple-primary: #9654FF;
+  --purple-container: #7B42BC;
+  --purple-card-light: #A266F5;
+  --text-white: #FFFFFF;
+}
+
+.play-page-container {
+  background-color: var(--bg-dark);
+  min-height: 100vh;
+  color: var(--text-white);
+  font-family: 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+}
+
+.play-content-wrapper {
+  margin-top: 100px;
+  padding: 0 5%;
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* --- COLUNA ESQUERDA (POSTER + INFO) --- */
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 220px; /* Largura fixa para o poster */
+  flex-shrink: 0;
+}
+
+.poster-frame {
+  width: 100%;
+  height: 320px;
+  border-radius: 20px; /* Arredondamento conforme imagem */
+  border: 5px solid var(--purple-primary); /* Borda roxa grossa */
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  background-color: #000;
+}
+
+.anime-poster-vertical {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.episode-info-card {
+  background-color: var(--purple-primary); /* Roxo mais vivo no card de info */
+  border-radius: 15px;
+  padding: 15px;
+  border: 2px solid #7B42BC;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.info-text h3 {
+  font-size: 15px;
+  margin: 0 0 5px 0;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+.info-text p {
+  font-size: 13px;
+  margin: 0;
+  color: #f0f0f0;
+}
+
+.info-date {
+  margin-top: 5px !important;
+  font-weight: 700;
+}
+
+.action-icons {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s;
+}
+.icon-btn:hover { transform: scale(1.1); }
+
+/* --- ÁREA PRINCIPAL ROXA (DIREITA) --- */
+.main-player-frame {
+  flex: 1;
+  max-width: 1000px;
+  height: 500px; /* Altura ajustada */
+  background-color: var(--purple-container); /* Roxo do container */
+  border-radius: 25px;
+  padding: 25px;
+  display: flex;
+  gap: 25px;
+  border: 4px solid #9e64e6; /* Borda levemente mais clara */
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+}
+
+/* VÍDEO */
+.video-area {
+  flex: 2; /* Ocupa mais espaço */
+  background-color: #000;
+  border-radius: 15px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.video-placeholder {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.video-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.7;
+}
+
+.play-button-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 3px solid white;
+  transition: all 0.2s;
+}
+.play-button-overlay:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  background-color: var(--purple-primary);
+  border-color: var(--purple-primary);
+}
+
+/* LISTA DE EPISÓDIOS */
+.episodes-list-container {
+  flex: 1; /* Coluna lateral */
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(0,0,0,0.1); /* Fundo sutil para a lista */
+  border-radius: 15px;
+  padding: 10px;
+}
+
+.episodes-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 5px;
+}
+
+/* Scrollbar */
+.episodes-scroll::-webkit-scrollbar { width: 8px; }
+.episodes-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
+.episodes-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+.episode-item {
+  background-color: var(--purple-card-light); /* Lilás claro */
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-height: 80px;
+}
+
+.episode-item:hover {
+  background-color: #cbb2f5;
+}
+
+.episode-thumb {
+  width: 100px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.episode-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.episode-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ep-title {
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 1.2;
+  margin-bottom: 5px;
+  color: white;
+}
+
+.ep-duration {
+  font-size: 11px;
+  color: rgba(255,255,255,0.8);
+}
+
+@media (max-width: 900px) {
+  .play-content-wrapper { flex-direction: column; align-items: center; }
+  .left-panel { width: 100%; flex-direction: row; justify-content: center; }
+  .poster-frame { width: 180px; height: 260px; }
+  .main-player-frame { flex-direction: column; height: auto; width: 100%; }
+  .video-area { height: 250px; }
+  .episodes-list-container { height: 350px; }
+}
