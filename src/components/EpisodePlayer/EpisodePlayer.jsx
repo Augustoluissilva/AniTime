@@ -1,108 +1,88 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react' 
-import { useParams, Link } from 'react-router-dom' 
-import Hls from 'hls.js' 
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import Hls from 'hls.js';
+import { ThumbsUp, Download, Play } from 'lucide-react';
+
+// Firebase Imports
 import { 
     doc, 
     getDoc, 
-    setDoc,
+    setDoc, 
     collection, 
     query, 
     where, 
     getDocs 
-} from 'firebase/firestore' 
-import { onAuthStateChanged } from 'firebase/auth' 
-import { db, auth } from '../../firebase/config' 
-import './EpisodePlayer.css'
+} from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { db, auth } from '../../firebase/config';
 
-const PROGRESS_SAVE_INTERVAL_MS = 10000; 
+// Componentes e Estilos
+import Header from '../Header/Header';
+import './EpisodePlayer.css';
 
-// [COMPONENTE] Seletor de Episódios (Mantido)
-const EpisodeSelector = ({ animeId, episodesList, currentEpisodeId }) => {
-    return (
-        <div style={{ marginTop: '2rem', padding: '1rem', borderTop: '1px solid #A066FF22', maxWidth: '1280px', width: '100%' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#B27AFF' }}>Lista de Episódios:</h2>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                {episodesList.map((ep) => (
-                    <Link
-                        key={ep.episodeId}
-                        to={`/watch/${animeId}/${ep.episodeId}`}
-                        style={{
-                            textDecoration: 'none',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '8px',
-                            fontWeight: ep.episodeId === currentEpisodeId ? 'bold' : 'normal',
-                            backgroundColor: ep.episodeId === currentEpisodeId ? '#A066FF' : '#1A0E2A',
-                            color: ep.episodeId === currentEpisodeId ? 'white' : '#B27AFF',
-                            border: `2px solid ${ep.episodeId === currentEpisodeId ? 'white' : '#A066FF'}`,
-                            transition: 'all 0.2s ease',
-                            cursor: 'pointer',
-                            textAlign: 'center',
-                        }}
-                        onClick={(e) => {
-                            if (ep.episodeId === currentEpisodeId) e.preventDefault();
-                        }}
-                    >
-                        {ep.title || `Ep. ${ep.episodeId}`}
-                    </Link>
-                ))}
-            </div>
-        </div>
-    )
-}
+// Imagens (Fallbacks)
+import posterPlaceholder from '../../assets/SPY_FAMILY.png'; 
+import thumbPlaceholder from '../../assets/SPY_FAMILY.png';
 
+const PROGRESS_SAVE_INTERVAL_MS = 10000;
 
 const EpisodePlayer = () => {
-    const { animeId, episodeId } = useParams()
+    const { animeId, episodeId } = useParams();
+    const navigate = useNavigate();
     
-    const hlsRef = useRef(null) 
-    const videoRef = useRef(null) 
+    // Referências
+    const hlsRef = useRef(null);
+    const videoRef = useRef(null);
+    const progressUpdateTimer = useRef(null);
     
-    const [videoUrl, setVideoUrl] = useState(null)
-    const [episodeTitle, setEpisodeTitle] = useState('Carregando...')
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
-    const [episodesList, setEpisodesList] = useState([]) 
+    // Estados
+    const [userId, setUserId] = useState(null);
+    const [videoUrl, setVideoUrl] = useState(null);
+    const [episodeTitle, setEpisodeTitle] = useState('Carregando...');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [episodesList, setEpisodesList] = useState([]);
+    const [initialTime, setInitialTime] = useState(0);
     
-    const [initialTime, setInitialTime] = useState(0)
-    const progressUpdateTimer = useRef(null)
-    const [userId, setUserId] = useState(null); 
+    // Estados visuais (Imagens dinâmicas)
+    const [currentPoster, setCurrentPoster] = useState(posterPlaceholder);
+    const [currentThumbnail, setCurrentThumbnail] = useState(thumbPlaceholder);
 
-
-    // [FUNÇÃO MEMORIZADA] Constrói o ID único para salvar o progresso.
+    // [FUNÇÃO] ID do documento de progresso
     const getProgressDocId = useCallback(() => {
         return `${userId || 'anon_user'}_${animeId}_${episodeId}`;
-    }, [userId, animeId, episodeId]); 
-    
-    // [FUNÇÃO MEMORIZADA] Salva o progresso do vídeo no Firestore.
+    }, [userId, animeId, episodeId]);
+
+    // [FUNÇÃO] Salvar Progresso
     const savePlaybackProgress = useCallback(async (currentTime, isFinished = false) => {
-        if (!userId) return; 
+        if (!userId) return;
 
         const docId = getProgressDocId();
-        const video = videoRef.current; 
+        const video = videoRef.current;
         if (!video) return;
 
         const isNearEnd = video.duration && (currentTime / video.duration) > 0.98;
-        
-        if (isFinished || isNearEnd) { 
-             const progressData = {
-                animeId: animeId,
-                episodeId: episodeId,
+
+        if (isFinished || isNearEnd) {
+            const progressData = {
+                animeId,
+                episodeId,
                 timestamp: Date.now(),
-                currentTime: 0, 
-                finished: true 
+                currentTime: 0,
+                finished: true
             };
             try {
                 await setDoc(doc(db, 'userProgress', docId), progressData);
-                console.log(`[SAVE] Progresso FINALIZADO salvo para: ${docId}`);
+                console.log(`[SAVE] Finalizado: ${docId}`);
             } catch (e) {
-                console.error(`[ERROR] Falha ao salvar progresso finalizado para ${docId}:`, e);
+                console.error(`[ERROR] Save failed:`, e);
             }
             return;
         }
 
         const progressData = {
-            animeId: animeId,
-            episodeId: episodeId,
+            animeId,
+            episodeId,
             timestamp: Date.now(),
             currentTime: Math.floor(currentTime),
             finished: false
@@ -111,290 +91,283 @@ const EpisodePlayer = () => {
         try {
             await setDoc(doc(db, 'userProgress', docId), progressData);
         } catch (e) {
-            console.error(`[ERROR] Falha ao salvar progresso para ${docId}:`, e);
-        }
-    }, [userId, animeId, episodeId, getProgressDocId]); 
-    
-    // [FUNÇÃO MEMORIZADA] Busca o progresso salvo no Firestore.
-    const getPlaybackProgress = useCallback(async () => {
-        if (!userId) return 0;
-        
-        try {
-            const docRef = doc(db, 'userProgress', getProgressDocId()); 
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                const savedTime = data.currentTime || 0;
-                console.log(`[LOAD] Progresso encontrado para ${docRef.id}: ${savedTime}s`);
-                return data.finished ? 0 : savedTime; 
-            } else {
-                console.log(`[LOAD] Nenhum progresso encontrado para ${docRef.id}.`);
-                return 0;
-            }
-        } catch (e) {
-            console.error("[ERROR] Falha ao buscar progresso:", e);
-            return 0;
+            console.error(`[ERROR] Save failed:`, e);
         }
     }, [userId, animeId, episodeId, getProgressDocId]);
 
+    // [FUNÇÃO] Buscar Progresso
+    const getPlaybackProgress = useCallback(async () => {
+        if (!userId) return 0;
+        try {
+            const docRef = doc(db, 'userProgress', getProgressDocId());
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                return data.finished ? 0 : (data.currentTime || 0);
+            }
+            return 0;
+        } catch (e) {
+            console.error("[ERROR] Get progress failed:", e);
+            return 0;
+        }
+    }, [userId, getProgressDocId]); 
 
-    // [EFEITO 0] Resolve o estado de autenticação (Configura o userId).
+    // [EFEITO 0] Autenticação
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            const newUserId = user ? user.uid : 'anon_user';
-            setUserId(newUserId); 
+            setUserId(user ? user.uid : 'anon_user');
         });
         return () => unsubscribe();
-    }, []); 
+    }, []);
 
-
-    // [EFEITO 1] Busca os dados do episódio e o progresso do usuário.
+    // [EFEITO 1] Buscar Dados (Anime, Episódios e URL)
     useEffect(() => {
         if (!userId) return;
 
         const fetchEpisodeAndProgress = async () => {
             try {
-                setLoading(true) 
-                setError(null)
-                
-                // --- 1. BUSCA DA LISTA DE EPISÓDIOS (Manter código original)
+                setLoading(true);
+                setError(null);
+
+                // 0. Buscar Dados do Anime (Poster/Capa)
+                try {
+                    const animeDocRef = doc(db, 'animes', animeId);
+                    const animeDoc = await getDoc(animeDocRef);
+                    if (animeDoc.exists()) {
+                        const animeData = animeDoc.data();
+                        const posterUrl = animeData.imageUrl || animeData.image || animeData.cover || posterPlaceholder;
+                        setCurrentPoster(posterUrl);
+                    }
+                } catch (animeErr) {
+                    console.warn("Não foi possível carregar o poster do anime:", animeErr);
+                }
+
+                // 1. Buscar Lista de Episódios
                 let fetchedEpisodes = [];
                 if (animeId === 'frieren') {
-                     fetchedEpisodes = [
+                    fetchedEpisodes = [
                         { episodeId: '1', title: 'O Fim da Jornada', animeSlug: 'frieren' },
                         { episodeId: '2', title: 'Não Precisa Ser Magia...', animeSlug: 'frieren' }
                     ];
                 } else {
                     const episodesCollection = collection(db, 'episodes');
-                    const qList = query(
-                        episodesCollection,
-                        where('animeSlug', '==', animeId) 
-                    );
+                    const qList = query(episodesCollection, where('animeSlug', '==', animeId));
                     const listSnapshot = await getDocs(qList);
                     fetchedEpisodes = listSnapshot.docs.map(doc => {
                         const data = doc.data();
                         const episodeNumberMatch = doc.id.match(/e(\d+)$/);
-                        const episodeNumber = episodeNumberMatch ? episodeNumberMatch[1] : '1';
-                        
                         return {
                             ...data,
                             id: doc.id,
-                            episodeId: episodeNumber 
+                            episodeId: episodeNumberMatch ? episodeNumberMatch[1] : '1',
+                            img: data.thumbnail || thumbPlaceholder
                         };
                     }).sort((a, b) => parseInt(a.episodeId) - parseInt(b.episodeId));
                 }
-                
                 setEpisodesList(fetchedEpisodes);
 
-                // --- 2. BUSCA DO EPISÓDIO ATUAL ---
+                // 2. Buscar Episódio Atual
                 const paddedEpisodeId = episodeId.padStart(2, '0');
-                const currentDocumentId = `${animeId}_s01e${paddedEpisodeId}`; 
+                const currentDocumentId = `${animeId}_s01e${paddedEpisodeId}`;
+                const episodeDocRef = doc(db, 'episodes', currentDocumentId);
+                const episodeDoc = await getDoc(episodeDocRef);
 
-                const episodeDocRef = doc(db, 'episodes', currentDocumentId)
-                const episodeDoc = await getDoc(episodeDocRef)
-                
                 let fetchedVideoUrl = null;
                 let finalTitle = `Episódio ${episodeId}`;
 
                 if (episodeDoc.exists()) {
-                    const data = episodeDoc.data()
+                    const data = episodeDoc.data();
                     fetchedVideoUrl = data.hlsUrl;
-                    finalTitle = data.title || fetchedEpisodes.find(ep => ep.episodeId === episodeId)?.title || finalTitle;
+                    finalTitle = data.title || finalTitle;
+                    
+                    if (data.thumbnail) {
+                        setCurrentThumbnail(data.thumbnail);
+                    }
                 } else {
-                    const msg = `Episódio não encontrado. ID esperado no Firestore: ${currentDocumentId}`;
+                    const msg = `Episódio não encontrado. ID: ${currentDocumentId}`;
+                    console.warn(msg);
                     setError(msg);
-                    fetchedVideoUrl = null; 
                 }
 
-                setVideoUrl(fetchedVideoUrl)
-                setEpisodeTitle(finalTitle)
+                setVideoUrl(fetchedVideoUrl);
+                setEpisodeTitle(finalTitle);
 
-                // --- 3. BUSCA DO PROGRESSO DO USUÁRIO ---
+                // 3. Buscar Progresso Inicial
                 if (fetchedVideoUrl) {
                     const savedTime = await getPlaybackProgress();
                     setInitialTime(savedTime);
                 }
 
-
             } catch (err) {
-                setError('Erro ao conectar ou buscar dados do serviço de metadados.')
-                setVideoUrl(null); 
+                console.error("Erro ao buscar dados:", err);
+                setError('Erro ao carregar dados do episódio.');
             } finally {
-                setLoading(false)
-            }
-        }
-        
-        fetchEpisodeAndProgress()
-        
-        return () => {
-            if (progressUpdateTimer.current) { 
-                clearInterval(progressUpdateTimer.current);
+                setLoading(false);
             }
         };
-    }, [animeId, episodeId, userId, getPlaybackProgress]) 
 
-    
-    // [CALLBACK REF] Funções que inicializa e limpa o player (Substitui Effect 2 e Effect 3)
+        fetchEpisodeAndProgress();
+
+        return () => {
+            if (progressUpdateTimer.current) clearInterval(progressUpdateTimer.current);
+        };
+    }, [animeId, episodeId, userId, getPlaybackProgress]);
+
+    // [CALLBACK] Configuração do Player de Vídeo
     const setVideoElement = useCallback(node => {
-        
-        // 1. Limpeza de estados anteriores
+        // Limpeza
         if (hlsRef.current) {
             hlsRef.current.destroy();
             hlsRef.current = null;
         }
-        if (progressUpdateTimer.current) { 
+        if (progressUpdateTimer.current) {
             clearInterval(progressUpdateTimer.current);
             progressUpdateTimer.current = null;
         }
-        
-        videoRef.current = node; 
-        
-        if (!node || !videoUrl) {
-            if (node) { 
-                node.src = ""; 
-                node.load();
-            }
-            return;
-        }
-        
+
+        videoRef.current = node;
+
+        if (!node || !videoUrl) return;
+
         const video = node;
         const source = videoUrl;
-        
-        // FIX: Mova a declaração de handleVideoEnded para o topo, antes de ser usada
-        const handleVideoEnded = () => {
-            savePlaybackProgress(0, true);
-        };
 
-        // Função de reprodução que garante que o player está pronto
+        const handleVideoEnded = () => savePlaybackProgress(0, true);
+
         const startPlayback = () => {
-            if (initialTime > 0) {
-                video.currentTime = initialTime;
+            if (initialTime > 0) video.currentTime = initialTime;
+            
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => console.log("Autoplay preventido pelo navegador"));
             }
-            
-            video.play().catch(e => console.error("[PLAYER] Erro ao tentar autoPlay:", e));
-            
-            // Inicia o timer para salvar o progresso periodicamente
+
             progressUpdateTimer.current = setInterval(() => {
                 if (!video.paused && !video.ended) {
                     savePlaybackProgress(video.currentTime);
                 }
             }, PROGRESS_SAVE_INTERVAL_MS);
-        }
+        };
 
-        // --- Lógica de Inicialização do Player ---
-
-        // Suporte nativo (Safari e outros)
-        if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            video.src = source;
-            video.load(); 
-            
-            const handleMetadataLoaded = () => {
-                startPlayback();
-            }
-            
-            video.addEventListener('loadedmetadata', handleMetadataLoaded);
-            video.addEventListener('ended', handleVideoEnded); // AGORA ESTÁ EM ESCOPO
-
-            return () => {
-                video.removeEventListener('loadedmetadata', handleMetadataLoaded);
-                video.removeEventListener('ended', handleVideoEnded);
-            };
-        }
-        
-        // HLS.js para navegadores sem suporte nativo
-        else if (Hls.isSupported()) {
-            
+        if (Hls.isSupported()) {
             const hls = new Hls();
             hlsRef.current = hls;
+            hls.loadSource(source);
             hls.attachMedia(video);
-            
-            hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-                hls.loadSource(source);
+            hls.on(Hls.Events.MANIFEST_PARSED, startPlayback);
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) setError(`Erro de reprodução: ${data.details}`);
             });
-            
-            const handleHlsMetadataLoaded = () => {
-                startPlayback();
-            };
-
-            video.addEventListener('loadedmetadata', handleHlsMetadataLoaded);
-            video.addEventListener('ended', handleVideoEnded); // AGORA ESTÁ EM ESCOPO
-
-            hls.on(Hls.Events.ERROR, function (event, data) {
-                if (data.fatal) {
-                    setError(`Erro crítico no HLS.js: ${data.details}`);
-                }
-            });
-
-            return () => {
-                video.removeEventListener('loadedmetadata', handleHlsMetadataLoaded);
-                video.removeEventListener('ended', handleVideoEnded);
-                if (hlsRef.current) {
-                    hlsRef.current.destroy();
-                    hlsRef.current = null;
-                }
-            };
-        } else {
-            setError("O formato HLS não é suportado por este navegador.")
+            video.addEventListener('ended', handleVideoEnded);
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = source;
+            video.addEventListener('loadedmetadata', startPlayback);
+            video.addEventListener('ended', handleVideoEnded);
         }
-        
-    }, [videoUrl, initialTime, savePlaybackProgress]); 
+
+    }, [videoUrl, initialTime, savePlaybackProgress]);
 
 
-    // --- RENDERIZAÇÃO (JSX) ---
-
-    if (!userId || loading) {
-        return <div className="player-loading">Carregando player...</div>
-    }
-    
-    const isAnon = userId === 'anon_user';
+    // --- RENDERIZAÇÃO ---
 
     return (
-        <div className="episode-player-container">
-            <h1 className="episode-title">{episodeTitle}</h1>
-            
-            {error && <div className="player-error">{error}</div>}
+        <div className="play-page-container">
+            <Header />
 
-            <div className="player-wrapper" style={{ display: error ? 'none' : 'block' }}>
-                {!error ? (
-                    <video 
-                        ref={setVideoElement} // USANDO O CALLBACK REF
-                        className="video-player" 
-                        controls
-                        autoPlay 
-                        width="100%" 
-                        height="100%"
-                        playsInline
-                    ></video>
-                ) : (
-                    <div style={{ padding: '50px', color: 'gray' }}>Detalhes do erro acima.</div>
-                )}
+            <div className="play-content-wrapper">
+                
+                {/* --- COLUNA ESQUERDA --- */}
+                <div className="left-panel">
+                    <div className="poster-frame">
+                        {/* Imagem dinâmica do poster do anime */}
+                        <img src={currentPoster} alt="Poster" className="anime-poster-vertical" />
+                    </div>
+
+                    <div className="episode-info-card">
+                        <div className="info-header">
+                            <h3>Episódio {episodeId}</h3>
+                            <span className="info-date">Hoje</span>
+                        </div>
+                        
+                        <h4 className="episode-title-text">{episodeTitle}</h4>
+                        <p className="episode-desc">
+                            Assista ao episódio {episodeId} de {animeId}.
+                        </p>
+                        
+                        <div className="action-row">
+                            <button className="icon-btn"><ThumbsUp size={20} /></button>
+                            <button className="icon-btn"><Download size={20} /></button>
+                            <span className="duration-badge">24m</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* --- ÁREA PRINCIPAL ROXA --- */}
+                <div className="main-player-frame">
+                    
+                    {/* PLAYER DE VÍDEO */}
+                    <div className="video-area">
+                        {loading ? (
+                            <div className="player-loading">Carregando Player...</div>
+                        ) : error ? (
+                            <div className="player-error">
+                                <p>{error}</p>
+                                <p style={{fontSize:'12px', marginTop:'10px'}}>Verifique se a URL do vídeo existe no Firestore.</p>
+                            </div>
+                        ) : (
+                            <video 
+                                ref={setVideoElement} 
+                                className="video-player"
+                                controls
+                                width="100%"
+                                height="100%"
+                                style={{ backgroundColor: '#000', borderRadius: '15px' }}
+                                poster={currentThumbnail} // Thumbnail dinâmica para o player
+                            />
+                        )}
+                        
+                        {userId === 'anon_user' && !loading && (
+                            <div className="auth-warning-overlay">
+                                ⚠️ Modo Anônimo: Progresso não será salvo permanentemente.
+                            </div>
+                        )}
+                    </div>
+
+                    {/* LISTA LATERAL DE EPISÓDIOS */}
+                    <div className="episodes-sidebar">
+                        <div className="sidebar-header">
+                            <h3>Próximos Episódios</h3>
+                        </div>
+                        
+                        <div className="episodes-scroll">
+                            {episodesList.length > 0 ? episodesList.map((ep) => (
+                                <Link 
+                                    to={`/watch/${animeId}/${ep.episodeId}`}
+                                    key={ep.id || ep.episodeId} 
+                                    style={{ textDecoration: 'none' }}
+                                >
+                                    <div className={`episode-item ${ep.episodeId === episodeId ? 'playing' : ''}`}>
+                                        <div className="episode-thumb-wrapper">
+                                            <img src={ep.img || thumbPlaceholder} alt={ep.title} />
+                                            <div className="play-hover"><Play size={12} fill="white" /></div>
+                                        </div>
+                                        <div className="episode-meta">
+                                            <span className="ep-number">Ep. {ep.episodeId}</span>
+                                            <span className="ep-title">{ep.title}</span>
+                                            <span className="ep-duration">24m</span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            )) : (
+                                <div style={{padding:'10px', color:'#aaa'}}>Nenhum episódio listado.</div>
+                            )}
+                        </div>
+                    </div>
+
+                </div>
             </div>
-            
-            {/* Nota de Retomada de Progresso */}
-            {initialTime > 0 && !error && (
-                <div className="playback-note">
-                    Retomando em {Math.floor(initialTime / 60)}m {initialTime % 60}s. Seu progresso é salvo automaticamente.
-                </div>
-            )}
-            
-            {/* Aviso de Usuário Deslogado */}
-            {isAnon && !error && (
-                <div className="playback-note" style={{ color: 'yellow', marginTop: '0.5rem' }}>
-                    ⚠️ Você está deslogado. Seu progresso está sendo salvo temporariamente. **Faça login para salvar de forma permanente!**
-                </div>
-            )}
-
-            {/* Seletor de Episódios */}
-            {episodesList.length > 0 && (
-                <EpisodeSelector 
-                    animeId={animeId} 
-                    episodesList={episodesList} 
-                    currentEpisodeId={episodeId}
-                />
-            )}
         </div>
-    )
-}
+    );
+};
 
-export default EpisodePlayer
+export default EpisodePlayer;
