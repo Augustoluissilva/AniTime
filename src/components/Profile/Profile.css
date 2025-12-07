@@ -1,68 +1,260 @@
-/* src/components/Profile/Profile.css */
-.profile-container {
-    min-height: 80vh;
-    padding: 4rem 2rem;
-    /* Variáveis do App.css */
-    background: var(--purple-bg); 
-    display: flex;
-    justify-content: center;
+:root {
+  --bg-dark: #0D0015;      
+  --purple-banner: #8B5CF6; /* Roxo vibrante do banner */
+  --purple-card: #A78BFA;   /* Roxo claro do card vazio */
+  --avatar-bg: #C4B5FD;     /* Lilás do avatar */
+  --text-white: #FFFFFF;
+  --input-bg: #FFFFFF;
+  --input-text: #333333;
+}
+
+body {
+  background-color: var(--bg-dark);
+}
+
+.profile-page-container {
+  background-color: var(--bg-dark);
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-white);
+  overflow-x: hidden;
+  position: relative;
+  /* Compensa a altura do Header fixo se necessário, ou ajusta o layout */
+  padding-top: 0; 
+}
+
+/* --- 1. BANNER SUPERIOR --- */
+.profile-banner {
+  background-color: var(--purple-banner);
+  height: 220px; /* Altura maior conforme imagem */
+  width: 100%;
+  position: relative;
+  margin-top: 70px; /* Espaço do Header */
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px 40px;
+}
+
+.camera-icon-banner {
+  color: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.camera-icon-banner:hover { color: rgba(0, 0, 0, 0.5); }
+
+/* --- 2. CONTAINER DE CONTEÚDO --- */
+.profile-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+  position: relative;
+}
+
+/* --- 3. AVATAR (Sobreposição Exata) --- */
+.profile-avatar-wrapper {
+  width: 170px;
+  height: 170px;
+  background-color: var(--avatar-bg);
+  border-radius: 50%;
+  
+  /* Posicionamento Absoluto para o efeito de "overlap" */
+  position: absolute;
+  top: -85px; /* Metade da altura para subir no banner */
+  left: 50px; 
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 20; /* Acima de tudo */
+}
+
+/* Ícone da câmera dentro do avatar */
+.profile-avatar-wrapper svg {
+  color: #7c3aed;
+  opacity: 0.6;
+}
+
+/* --- 4. GRID PRINCIPAL --- */
+.profile-grid {
+  display: flex;
+  justify-content: space-between;
+  /* Empurra o conteúdo para baixo para não bater no avatar */
+  padding-top: 100px; 
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+/* --- COLUNA ESQUERDA (Formulário) --- */
+.profile-form-section {
+  flex: 1;
+  min-width: 350px;
+  max-width: 550px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Espaçamento entre campos */
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-group label {
+  font-size: 20px;
+  color: #CCC; /* Cinza claro */
+  font-weight: 400;
+  margin-left: 15px;
+}
+
+.input-display {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  padding: 10px 25px;
+  border-radius: 30px; /* Borda bem arredondada (Pill) */
+  font-size: 18px;
+  font-weight: 500;
+  border: none;
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* --- COLUNA DIREITA (Favoritos) --- */
+.profile-favorites-section {
+  flex: 1;
+  min-width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Alinha tudo à direita */
+  position: relative;
+  /* Ajuste vertical para alinhar com a imagem */
+  top: -60px; 
+}
+
+/* Pílula "Favoritos" */
+.favorites-title-pill {
+  background-color: white;
+  color: #555;
+  font-size: 24px;
+  font-weight: 600;
+  padding: 5px 50px;
+  border-radius: 50px;
+  margin-bottom: 20px;
+  display: inline-block;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  /* Posicionamento para ficar na área preta, perto do banner */
+  margin-right: 20px;
+}
+
+.favorites-list {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.fav-card {
+  width: 180px;
+  height: 250px;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.fav-card:hover {
+  transform: scale(1.02);
+}
+
+/* Card Vazio (Roxo Sólido) */
+.fav-card.placeholder {
+  background-color: var(--purple-card); /* Roxo claro */
+  border: none;
+}
+
+/* Detalhe decorativo (aba lateral) no card roxo placeholder */
+.fav-card.placeholder::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 60%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 60px;
+  background-color: #8B5CF6; /* Roxo mais escuro */
+  border-radius: 12px;
+}
+
+/* Card Preenchido (Imagem) */
+.fav-card.filled {
+  background-color: white;
+  border: 4px solid white; /* Borda branca grossa */
+}
+
+.fav-card.filled img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Botão Sair */
+.logout-btn {
+  margin-top: 20px;
+  margin-left: 10px;
+  background: transparent;
+  border: none;
+  color: #FFFFFF;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: left;
+  width: fit-content;
+  opacity: 0.8;
+  text-decoration: underline;
+}
+.logout-btn:hover { opacity: 1; color: #ff6b6b; }
+
+/* --- RESPONSIVIDADE --- */
+@media (max-width: 900px) {
+  .profile-grid {
+    flex-direction: column;
+    padding-top: 120px;
     align-items: center;
-    color: var(--white);
-}
+  }
 
-.profile-card {
-    /* Variáveis do App.css */
-    background: var(--dark-purple); 
-    padding: 3rem;
-    border-radius: 12px;
-    box-shadow: 0 0 30px rgba(160, 102, 255, 0.4);
-    max-width: 400px;
+  .profile-avatar-wrapper {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .profile-form-section {
     width: 100%;
-    text-align: center;
-}
+    align-items: center;
+  }
+  
+  .input-group {
+    width: 100%;
+  }
 
-.profile-title {
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
-    /* Variável do App.css */
-    color: var(--neon-purple); 
-    font-weight: 300;
-}
-
-.profile-info p {
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(160, 102, 255, 0.2);
-    word-wrap: break-word;
-}
-
-.profile-info strong {
-    /* Variável do App.css */
-    color: var(--light-purple); 
-    font-weight: 400;
-}
-
-.logout-button {
-    background: #ff5555;
-    color: white;
-    border: none;
-    padding: 0.75rem 2rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 1.5rem;
-}
-
-.logout-button:hover {
-    background: #ff3333;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(255, 85, 85, 0.4);
-}
-
-.not-logged-in {
-    font-size: 1.2rem;
-    color: #ff5555;
+  .profile-favorites-section {
+    align-items: center;
+    top: 0;
+    margin-top: 30px;
+    width: 100%;
+  }
+  
+  .favorites-list {
+    justify-content: center;
+  }
+  
+  .favorites-title-pill {
+    margin-right: 0;
+  }
 }
