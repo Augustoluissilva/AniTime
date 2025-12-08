@@ -226,6 +226,7 @@
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
+  background-color: #381b5c;
 }
 
 .episode-thumb-wrapper img {

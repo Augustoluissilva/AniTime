@@ -30,8 +30,8 @@ const AnimeCarousel = () => {
       id: 2,
       title: 'FRIEREN',
       image: freeren,
-      featured: true,
-      slug: 'frieren_s01e01' // <-- SLUG REFERENTE AO MOCK DB
+      featured: false,
+      slug: 'frieren_s01e01'
     },
     {
       id: 3,

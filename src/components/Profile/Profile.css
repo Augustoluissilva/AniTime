@@ -26,10 +26,9 @@ body {
 /* --- 1. BANNER SUPERIOR --- */
 .profile-banner {
   background-color: var(--purple-banner);
-  height: 220px; /* Altura maior conforme imagem */
+  height: 220px;
   width: 100%;
   position: relative;
-  margin-top: 70px; /* Espaço do Header */
   display: flex;
   justify-content: flex-end;
   padding: 20px 40px;
@@ -251,7 +250,7 @@ body {
   }
   
   .favorites-list {
-    justify-content: center;
+    justify-content: flex-end;
   }
   
   .favorites-title-pill {

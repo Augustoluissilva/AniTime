@@ -11,7 +11,8 @@ import {
     collection, 
     query, 
     where, 
-    getDocs 
+    getDocs,
+    deleteDoc // <--- Importado para remover favoritos
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth } from '../../firebase/config';
@@ -19,10 +20,6 @@ import { db, auth } from '../../firebase/config';
 // Componentes e Estilos
 import Header from '../Header/Header';
 import './EpisodePlayer.css';
-
-// Imagens (Fallbacks)
-import posterPlaceholder from '../../assets/SPY_FAMILY.png'; 
-import thumbPlaceholder from '../../assets/SPY_FAMILY.png';
 
 const PROGRESS_SAVE_INTERVAL_MS = 10000;
 
@@ -44,14 +41,54 @@ const EpisodePlayer = () => {
     const [episodesList, setEpisodesList] = useState([]);
     const [initialTime, setInitialTime] = useState(0);
     
+    // NOVO ESTADO: Rastreia se o anime atual é favorito
+    const [isFavorite, setIsFavorite] = useState(false);
+
     // Estados visuais (Imagens dinâmicas)
-    const [currentPoster, setCurrentPoster] = useState(posterPlaceholder);
-    const [currentThumbnail, setCurrentThumbnail] = useState(thumbPlaceholder);
+    const [currentPoster, setCurrentPoster] = useState(null);
+    const [currentThumbnail, setCurrentThumbnail] = useState(null);
 
     // [FUNÇÃO] ID do documento de progresso
     const getProgressDocId = useCallback(() => {
         return `${userId || 'anon_user'}_${animeId}_${episodeId}`;
     }, [userId, animeId, episodeId]);
+
+    // [FUNÇÃO] Referência do documento de favorito
+    const getFavoriteDocRef = useCallback((uId, aId) => {
+        return doc(db, 'favorites', `${uId}_${aId}`);
+    }, []);
+
+    // [FUNÇÃO] Alternar Status de Favorito
+    const handleToggleFavorite = useCallback(async () => {
+        if (!userId || userId === 'anon_user') {
+            alert('Você precisa estar logado para adicionar favoritos!');
+            return;
+        }
+
+        const favDocRef = getFavoriteDocRef(userId, animeId);
+
+        try {
+            if (isFavorite) {
+                // Se já é favorito, remove
+                await deleteDoc(favDocRef);
+                setIsFavorite(false);
+                console.log(`[FAV] Removido: ${animeId}`);
+            } else {
+                // Se não é favorito, adiciona
+                const favoriteData = {
+                    userId: userId,
+                    animeId: animeId, 
+                    favoritedAt: new Date().toISOString()
+                };
+                await setDoc(favDocRef, favoriteData);
+                setIsFavorite(true);
+                console.log(`[FAV] Adicionado: ${animeId}`);
+            }
+        } catch (e) {
+            console.error("[ERROR] Falha ao alternar favorito:", e);
+            alert('Não foi possível salvar seu favorito.');
+        }
+    }, [userId, animeId, isFavorite, getFavoriteDocRef]);
 
     // [FUNÇÃO] Salvar Progresso
     const savePlaybackProgress = useCallback(async (currentTime, isFinished = false) => {
@@ -135,35 +172,43 @@ const EpisodePlayer = () => {
                     const animeDoc = await getDoc(animeDocRef);
                     if (animeDoc.exists()) {
                         const animeData = animeDoc.data();
-                        const posterUrl = animeData.imageUrl || animeData.image || animeData.cover || posterPlaceholder;
+                        const posterUrl = animeData.imageUrl || animeData.image || animeData.cover || null;
                         setCurrentPoster(posterUrl);
+                    } else {
+                        setCurrentPoster(null);
                     }
                 } catch (animeErr) {
                     console.warn("Não foi possível carregar o poster do anime:", animeErr);
+                    setCurrentPoster(null);
+                }
+
+                // NOVO: Verificar Status de Favorito
+                if (userId && userId !== 'anon_user') {
+                    const favDocRef = getFavoriteDocRef(userId, animeId);
+                    const favDocSnap = await getDoc(favDocRef);
+                    setIsFavorite(favDocSnap.exists());
+                } else {
+                    setIsFavorite(false);
                 }
 
                 // 1. Buscar Lista de Episódios
                 let fetchedEpisodes = [];
-                if (animeId === 'frieren') {
-                    fetchedEpisodes = [
-                        { episodeId: '1', title: 'O Fim da Jornada', animeSlug: 'frieren' },
-                        { episodeId: '2', title: 'Não Precisa Ser Magia...', animeSlug: 'frieren' }
-                    ];
-                } else {
-                    const episodesCollection = collection(db, 'episodes');
-                    const qList = query(episodesCollection, where('animeSlug', '==', animeId));
-                    const listSnapshot = await getDocs(qList);
-                    fetchedEpisodes = listSnapshot.docs.map(doc => {
-                        const data = doc.data();
-                        const episodeNumberMatch = doc.id.match(/e(\d+)$/);
-                        return {
-                            ...data,
-                            id: doc.id,
-                            episodeId: episodeNumberMatch ? episodeNumberMatch[1] : '1',
-                            img: data.thumbnail || thumbPlaceholder
-                        };
-                    }).sort((a, b) => parseInt(a.episodeId) - parseInt(b.episodeId));
-                }
+                
+                const episodesCollection = collection(db, 'episodes');
+                const qList = query(episodesCollection, where('animeSlug', '==', animeId));
+                const listSnapshot = await getDocs(qList);
+                
+                fetchedEpisodes = listSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    const episodeNumberMatch = doc.id.match(/e(\d+)$/);
+                    return {
+                        ...data,
+                        id: doc.id,
+                        episodeId: episodeNumberMatch ? episodeNumberMatch[1] : '1',
+                        img: data.thumbnail || null // Fallback para null
+                    };
+                }).sort((a, b) => parseInt(a.episodeId) - parseInt(b.episodeId));
+                
                 setEpisodesList(fetchedEpisodes);
 
                 // 2. Buscar Episódio Atual
@@ -182,6 +227,8 @@ const EpisodePlayer = () => {
                     
                     if (data.thumbnail) {
                         setCurrentThumbnail(data.thumbnail);
+                    } else {
+                        setCurrentThumbnail(null);
                     }
                 } else {
                     const msg = `Episódio não encontrado. ID: ${currentDocumentId}`;
@@ -211,7 +258,7 @@ const EpisodePlayer = () => {
         return () => {
             if (progressUpdateTimer.current) clearInterval(progressUpdateTimer.current);
         };
-    }, [animeId, episodeId, userId, getPlaybackProgress]);
+    }, [animeId, episodeId, userId, getPlaybackProgress, getFavoriteDocRef]);
 
     // [CALLBACK] Configuração do Player de Vídeo
     const setVideoElement = useCallback(node => {
@@ -256,6 +303,7 @@ const EpisodePlayer = () => {
             hls.attachMedia(video);
             hls.on(Hls.Events.MANIFEST_PARSED, startPlayback);
             hls.on(Hls.Events.ERROR, (event, data) => {
+                // ESTE É O ERRO 403 NO VÍDEO
                 if (data.fatal) setError(`Erro de reprodução: ${data.details}`);
             });
             video.addEventListener('ended', handleVideoEnded);
@@ -279,8 +327,9 @@ const EpisodePlayer = () => {
                 {/* --- COLUNA ESQUERDA --- */}
                 <div className="left-panel">
                     <div className="poster-frame">
-                        {/* Imagem dinâmica do poster do anime */}
-                        <img src={currentPoster} alt="Poster" className="anime-poster-vertical" />
+                        {currentPoster && (
+                            <img src={currentPoster} alt="Poster" className="anime-poster-vertical" />
+                        )}
                     </div>
 
                     <div className="episode-info-card">
@@ -295,7 +344,19 @@ const EpisodePlayer = () => {
                         </p>
                         
                         <div className="action-row">
-                            <button className="icon-btn"><ThumbsUp size={20} /></button>
+                            {/* BOTÃO FAVORITO (THUMBS UP) */}
+                            <button 
+                                className="icon-btn"
+                                onClick={handleToggleFavorite}
+                                style={{ opacity: userId === 'anon_user' || loading ? 0.6 : 1, cursor: userId === 'anon_user' || loading ? 'not-allowed' : 'pointer' }}
+                            >
+                                <ThumbsUp 
+                                    size={20} 
+                                    fill={isFavorite ? 'white' : 'none'} 
+                                    color={isFavorite ? 'white' : 'currentColor'} 
+                                />
+                            </button>
+
                             <button className="icon-btn"><Download size={20} /></button>
                             <span className="duration-badge">24m</span>
                         </div>
@@ -322,7 +383,7 @@ const EpisodePlayer = () => {
                                 width="100%"
                                 height="100%"
                                 style={{ backgroundColor: '#000', borderRadius: '15px' }}
-                                poster={currentThumbnail} // Thumbnail dinâmica para o player
+                                poster={currentThumbnail || undefined} 
                             />
                         )}
                         
@@ -348,7 +409,7 @@ const EpisodePlayer = () => {
                                 >
                                     <div className={`episode-item ${ep.episodeId === episodeId ? 'playing' : ''}`}>
                                         <div className="episode-thumb-wrapper">
-                                            <img src={ep.img || thumbPlaceholder} alt={ep.title} />
+                                            {ep.img && <img src={ep.img} alt={ep.title} />}
                                             <div className="play-hover"><Play size={12} fill="white" /></div>
                                         </div>
                                         <div className="episode-meta">
